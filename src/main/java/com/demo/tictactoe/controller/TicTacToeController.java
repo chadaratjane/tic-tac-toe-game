@@ -1,6 +1,7 @@
 package com.demo.tictactoe.controller;
 
 import com.demo.tictactoe.model.request.PlayerLoginRequest;
+import com.demo.tictactoe.model.request.PlayerStartRequest;
 import com.demo.tictactoe.model.response.CommonResponse;
 import com.demo.tictactoe.service.TicTacToeService;
 import org.apache.logging.log4j.LogManager;
@@ -30,5 +31,14 @@ public class TicTacToeController {
         logger.info("END IMPLEMENTING PLAYER LOGIN, response : {}", commonResponse);
         return new ResponseEntity<>(commonResponse, commonResponse.getHttpStatus());
     }
+
+    @PostMapping(value = "/start", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<CommonResponse> playerStart(@Valid @RequestBody PlayerStartRequest request) {
+        logger.info("START IMPLEMENTING PLAYER START");
+        CommonResponse commonResponse = ticTacToeService.playerStart(request);
+        logger.info("END IMPLEMENTING PLAYER START, response : {}", commonResponse);
+        return new ResponseEntity<>(commonResponse, commonResponse.getHttpStatus());
+    }
+
 
 }

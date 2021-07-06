@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 
 import java.util.Calendar;
 import java.util.UUID;
@@ -52,6 +53,8 @@ public class TicTacToeServiceTest {
         PlayerLoginResponse response = (PlayerLoginResponse) commonResponse.getData();
 
         assertEquals(entity.getPlayerId(), response.getPlayerId());
+        assertEquals("SUCCESS",commonResponse.getStatus());
+        assertEquals(HttpStatus.CREATED,commonResponse.getHttpStatus());
     }
 
 
