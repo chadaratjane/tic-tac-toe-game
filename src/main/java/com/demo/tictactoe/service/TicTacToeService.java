@@ -1,10 +1,14 @@
 package com.demo.tictactoe.service;
 
+import com.demo.tictactoe.constant.GameStatus;
+import com.demo.tictactoe.constant.GameType;
 import com.demo.tictactoe.constant.Status;
 import com.demo.tictactoe.exception.ValidateException;
+import com.demo.tictactoe.model.entity.BoardDataEntity;
 import com.demo.tictactoe.model.entity.GameDataEntity;
 import com.demo.tictactoe.model.entity.PlayerInformationEntity;
 import com.demo.tictactoe.model.request.PlayerLoginRequest;
+import com.demo.tictactoe.model.request.PlayerMoveRequest;
 import com.demo.tictactoe.model.request.PlayerStartRequest;
 import com.demo.tictactoe.model.response.CommonResponse;
 import com.demo.tictactoe.model.response.ErrorResponse;
@@ -75,8 +79,8 @@ public class TicTacToeService {
                 entity.setGameId(UUID.randomUUID());
                 entity.setGamePlayerId(playerInformationEntity.getPlayerId());
                 entity.setTableSize(request.getTableSize());
-                entity.setGameStatus("NOT FINISHED");
-                entity.setGameResult("NOT FINISHED");
+                entity.setGameType(GameType.SOLO.getValue());
+                entity.setGameStatus(GameStatus.IN_PROGRESS.getValue());
                 Date date = Calendar.getInstance().getTime();
                 entity.setGameCreatedDate(date);
                 entity.setGameUpdatedDate(date);
@@ -86,7 +90,7 @@ public class TicTacToeService {
                 response.setStatus(Status.SUCCESS.getValue());
                 PlayerStartResponse playerStartResponse = new PlayerStartResponse();
                 playerStartResponse.setGameId(saveEntity.getGameId());
-                playerStartResponse.setGameType("SOLO");
+                playerStartResponse.setGameType(saveEntity.getGameType());
                 response.setData(playerStartResponse);
                 response.setHttpStatus(HttpStatus.CREATED);
             }
@@ -121,8 +125,8 @@ public class TicTacToeService {
                     entity.setGamePlayerId(playerInformationEntity.getPlayerId());
                     entity.setGamePlayer2Id(player2InformationEntity.getPlayerId());
                     entity.setTableSize(request.getTableSize());
-                    entity.setGameStatus("NOT FINISHED");
-                    entity.setGameResult("NOT FINISHED");
+                    entity.setGameType(GameType.MULTI_PLAYER.getValue());
+                    entity.setGameStatus(GameStatus.IN_PROGRESS.getValue());
                     Date date = Calendar.getInstance().getTime();
                     entity.setGameCreatedDate(date);
                     entity.setGameUpdatedDate(date);
@@ -132,7 +136,7 @@ public class TicTacToeService {
                     response.setStatus(Status.SUCCESS.getValue());
                     PlayerStartResponse playerStartResponse = new PlayerStartResponse();
                     playerStartResponse.setGameId(saveEntity.getGameId());
-                    playerStartResponse.setGameType("MULTI PLAYER");
+                    playerStartResponse.setGameType(saveEntity.getGameType());
                     response.setData(playerStartResponse);
                     response.setHttpStatus(HttpStatus.CREATED);
                 }

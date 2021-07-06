@@ -1,5 +1,7 @@
 package com.demo.tictactoe.service;
 
+import com.demo.tictactoe.constant.GameStatus;
+import com.demo.tictactoe.constant.GameType;
 import com.demo.tictactoe.exception.ValidateException;
 import com.demo.tictactoe.model.entity.GameDataEntity;
 import com.demo.tictactoe.model.entity.PlayerInformationEntity;
@@ -78,8 +80,8 @@ public class TicTacToeServiceTest {
         gameDataEntity.setGameId(UUID.randomUUID());
         gameDataEntity.setGamePlayerId(resultUUID);
         gameDataEntity.setTableSize(3);
-        gameDataEntity.setGameStatus("MOCK NOT FINISHED");
-        gameDataEntity.setGameResult("MOCK NOT FINISHED");
+        gameDataEntity.setGameType(GameType.SOLO.getValue());
+        gameDataEntity.setGameStatus(GameStatus.IN_PROGRESS.getValue());
         Date date = Calendar.getInstance().getTime();
         gameDataEntity.setGameCreatedDate(date);
         gameDataEntity.setGameUpdatedDate(date);
@@ -125,8 +127,8 @@ public class TicTacToeServiceTest {
         gameDataEntity.setGamePlayerId(resultUUID);
         gameDataEntity.setGamePlayer2Id(resultUUID2);
         gameDataEntity.setTableSize(3);
-        gameDataEntity.setGameStatus("MOCK NOT FINISHED");
-        gameDataEntity.setGameResult("MOCK NOT FINISHED");
+        gameDataEntity.setGameType(GameType.MULTI_PLAYER.getValue());
+        gameDataEntity.setGameStatus(GameStatus.IN_PROGRESS.getValue());
         Date date = Calendar.getInstance().getTime();
         gameDataEntity.setGameCreatedDate(date);
         gameDataEntity.setGameUpdatedDate(date);
@@ -143,7 +145,7 @@ public class TicTacToeServiceTest {
         PlayerStartResponse response = (PlayerStartResponse) commonResponse.getData();
 
         assertEquals(gameDataEntity.getGameId(),response.getGameId());
-        assertEquals("MULTI PLAYER",response.getGameType());
+        assertEquals("MULTI_PLAYER",response.getGameType());
         assertEquals("SUCCESS",commonResponse.getStatus());
         assertEquals(HttpStatus.CREATED,commonResponse.getHttpStatus());
 

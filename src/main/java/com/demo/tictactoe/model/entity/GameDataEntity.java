@@ -22,11 +22,11 @@ public class GameDataEntity {
     @Column(name = "game_table_size")
     private Integer tableSize;
 
+    @Column(name = "game_type")
+    private String gameType;
+
     @Column(name = "game_status")
     private String gameStatus;
-
-    @Column(name = "game_result")
-    private String gameResult;
 
     @Column(name = "game_created_date")
     private Date gameCreatedDate;
@@ -74,12 +74,12 @@ public class GameDataEntity {
         this.gameStatus = gameStatus;
     }
 
-    public String getGameResult() {
-        return gameResult;
+    public String getGameType() {
+        return gameType;
     }
 
-    public void setGameResult(String gameResult) {
-        this.gameResult = gameResult;
+    public void setGameType(String gameType) {
+        this.gameType = gameType;
     }
 
     public Date getGameCreatedDate() {
@@ -105,8 +105,8 @@ public class GameDataEntity {
                 ", gamePlayerId=" + gamePlayerId +
                 ", gamePlayer2Id=" + gamePlayer2Id +
                 ", tableSize=" + tableSize +
+                ", gameType='" + gameType + '\'' +
                 ", gameStatus='" + gameStatus + '\'' +
-                ", gameResult='" + gameResult + '\'' +
                 ", gameCreatedDate=" + gameCreatedDate +
                 ", gameUpdatedDate=" + gameUpdatedDate +
                 '}';
