@@ -1,9 +1,9 @@
 package com.demo.tictactoe.service;
 
 import com.demo.tictactoe.model.entity.PlayerInformationEntity;
-import com.demo.tictactoe.model.request.RegisterPlayerRequest;
+import com.demo.tictactoe.model.request.PlayerLoginRequest;
 import com.demo.tictactoe.model.response.CommonResponse;
-import com.demo.tictactoe.model.response.RegisterPlayerResponse;
+import com.demo.tictactoe.model.response.PlayerLoginResponse;
 import com.demo.tictactoe.repository.BoardDataRepository;
 import com.demo.tictactoe.repository.GameDataRepository;
 import com.demo.tictactoe.repository.PlayerInformationRepository;
@@ -28,7 +28,7 @@ public class TicTacToeService {
     @Autowired
     private PlayerInformationRepository playerInformationRepository;
 
-    public CommonResponse registerPlayer(RegisterPlayerRequest request) {
+    public CommonResponse playerLogin(PlayerLoginRequest request) {
         PlayerInformationEntity entity = new PlayerInformationEntity();
         entity.setPlayerId(UUID.randomUUID());
         entity.setPlayerName(request.getPlayerName());
@@ -39,7 +39,7 @@ public class TicTacToeService {
 
         CommonResponse commonResponse = new CommonResponse();
         commonResponse.setStatus("SUCCESS");
-        RegisterPlayerResponse response = new RegisterPlayerResponse();
+        PlayerLoginResponse response = new PlayerLoginResponse();
         response.setPlayerId(saveEntity.getPlayerId());
         commonResponse.setData(response);
         commonResponse.setHttpStatus(HttpStatus.CREATED);

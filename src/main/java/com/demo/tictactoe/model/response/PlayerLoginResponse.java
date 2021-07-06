@@ -2,7 +2,7 @@ package com.demo.tictactoe.model.response;
 
 import java.util.UUID;
 
-public class RegisterPlayerResponse {
+public class PlayerLoginResponse {
 
     private UUID playerId;
 

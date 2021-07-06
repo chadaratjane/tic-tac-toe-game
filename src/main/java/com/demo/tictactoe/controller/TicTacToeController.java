@@ -1,6 +1,6 @@
 package com.demo.tictactoe.controller;
 
-import com.demo.tictactoe.model.request.RegisterPlayerRequest;
+import com.demo.tictactoe.model.request.PlayerLoginRequest;
 import com.demo.tictactoe.model.response.CommonResponse;
 import com.demo.tictactoe.service.TicTacToeService;
 import org.apache.logging.log4j.LogManager;
@@ -24,9 +24,9 @@ public class TicTacToeController {
 
 
     @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CommonResponse> registerPlayer (@Valid @RequestBody RegisterPlayerRequest request) {
+    public ResponseEntity<CommonResponse> playerLogin(@Valid @RequestBody PlayerLoginRequest request) {
         logger.info("START IMPLEMENTING PLAYER LOGIN");
-        CommonResponse commonResponse = ticTacToeService.registerPlayer(request);
+        CommonResponse commonResponse = ticTacToeService.playerLogin(request);
         logger.info("END IMPLEMENTING PLAYER LOGIN, response : {}", commonResponse);
         return new ResponseEntity<>(commonResponse, commonResponse.getHttpStatus());
     }

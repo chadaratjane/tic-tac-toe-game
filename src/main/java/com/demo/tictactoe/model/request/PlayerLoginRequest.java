@@ -1,6 +1,6 @@
 package com.demo.tictactoe.model.request;
 
-public class RegisterPlayerRequest {
+public class PlayerLoginRequest {
 
     private String playerName;
     private Integer playerAge;
