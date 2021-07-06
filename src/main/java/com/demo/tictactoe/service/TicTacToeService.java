@@ -1,6 +1,7 @@
 package com.demo.tictactoe.service;
 
 import com.demo.tictactoe.constant.Status;
+import com.demo.tictactoe.exception.ValidateException;
 import com.demo.tictactoe.model.entity.GameDataEntity;
 import com.demo.tictactoe.model.entity.PlayerInformationEntity;
 import com.demo.tictactoe.model.request.PlayerLoginRequest;
@@ -91,7 +92,10 @@ public class TicTacToeService {
             }
         } else {
             logger.info("GAME TYPE IS MULTI PLAYER");
+            if (request.getPlayerId().equals(request.getPlayer2Id())){
+            throw new ValidateException("DUPLICATE ID FOR BOTH PLAYERS","DUPLICATE ID FOR BOTH PLAYERS");
 
+            }
             if (playerInformationEntity == null) {
                 logger.error("PLAYER ID NOT FOUND");
                 response.setStatus(Status.NOT_FOUND.getValue());

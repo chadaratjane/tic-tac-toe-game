@@ -54,4 +54,16 @@ public class ErrorHandler {
         return new ResponseEntity<>(commonResponse,commonResponse.getHttpStatus());
     }
 
+    @ExceptionHandler(ValidateException.class)
+    public ResponseEntity<CommonResponse> handlerManualValidateException(ValidateException e){
+        logger.error("VALIDATION FAILED, {}",e.getErrorCause());
+        CommonResponse commonResponse = new CommonResponse();
+        commonResponse.setStatus(Status.BAD_REQUEST.getValue());
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setError(e.getErrorMessage());
+        commonResponse.setData(errorResponse);
+        commonResponse.setHttpStatus(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(commonResponse,commonResponse.getHttpStatus());
+    }
+
 }
