@@ -1,5 +1,6 @@
 package com.demo.tictactoe.exception;
 
+import com.demo.tictactoe.constant.Status;
 import com.demo.tictactoe.model.response.CommonResponse;
 import com.demo.tictactoe.model.response.ErrorResponse;
 import org.apache.logging.log4j.LogManager;
@@ -21,7 +22,7 @@ public class ErrorHandler {
     public ResponseEntity<CommonResponse> handlerAllError (Exception e){
         logger.error("UNEXPECTED ERROR",e);
         CommonResponse commonResponse = new CommonResponse();
-        commonResponse.setStatus("INTERNAL SERVER ERROR");
+        commonResponse.setStatus(Status.INTERNAL_SERVER_ERROR.getValue());
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setError("INTERNAL SERVER ERROR");
         commonResponse.setData(errorResponse);
@@ -33,7 +34,7 @@ public class ErrorHandler {
     public ResponseEntity<CommonResponse> handlerValidation(MethodArgumentNotValidException e) {
         logger.error("BAD REQUEST",e);
         CommonResponse commonResponse = new CommonResponse();
-        commonResponse.setStatus("BAD REQUEST");
+        commonResponse.setStatus(Status.BAD_REQUEST.getValue());
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setError(e.getFieldError().getDefaultMessage());
         commonResponse.setData(errorResponse);
@@ -45,7 +46,7 @@ public class ErrorHandler {
     public ResponseEntity<CommonResponse> handlerDataAccess(DataAccessException e){
         logger.error("DATA ACCESS FAILED",e);
         CommonResponse commonResponse = new CommonResponse();
-        commonResponse.setStatus("DATA ACCESS FAILED");
+        commonResponse.setStatus(Status.DATA_ACCESS_FAILED.getValue());
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setError("DATA ACCESS FAILED");
         commonResponse.setData(errorResponse);
