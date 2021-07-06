@@ -1,5 +1,6 @@
 package com.demo.tictactoe.service;
 
+import com.demo.tictactoe.exception.ValidateException;
 import com.demo.tictactoe.model.entity.GameDataEntity;
 import com.demo.tictactoe.model.entity.PlayerInformationEntity;
 import com.demo.tictactoe.model.request.PlayerLoginRequest;
@@ -147,5 +148,36 @@ public class TicTacToeServiceTest {
 
     }
 
+    @Test
+    public void fail_playerStart_duplicatePlayerIdOnMultiPlayerGameType(){
 
+        PlayerInformationEntity entity = new PlayerInformationEntity();
+        UUID resultUUID = UUID.randomUUID();
+        entity.setPlayerId(resultUUID);
+        entity.setPlayerName("Mock Player Name1");
+        entity.setPlayerAge(20);
+        entity.setPlayerCreatedDate(Calendar.getInstance().getTime());
+
+        PlayerInformationEntity entity2 = new PlayerInformationEntity();
+        entity2.setPlayerId(resultUUID);
+        entity2.setPlayerName("Mock Player Name2");
+        entity2.setPlayerAge(20);
+        entity2.setPlayerCreatedDate(Calendar.getInstance().getTime());
+
+        Mockito.doReturn(entity,entity2).when(playerInformationRepository).findAllByPlayerId(any());
+
+        try {
+            PlayerStartRequest request = new PlayerStartRequest();
+            request.setPlayerId(resultUUID);
+            request.setPlayer2Id(resultUUID);
+            request.setTableSize(3);
+
+            ticTacToeService.playerStart(request);
+
+        } catch (ValidateException e) {
+
+            assertEquals("DUPLICATE ID FOR BOTH PLAYERS", e.getErrorMessage());
+
+        }
+    }
 }
