@@ -89,39 +89,49 @@ public class TicTacToeService {
                 response.setData(playerStartResponse);
                 response.setHttpStatus(HttpStatus.CREATED);
             }
-        }else {
+        } else {
             logger.info("GAME TYPE IS MULTI PLAYER");
-            PlayerInformationEntity player2InformationEntity = playerInformationRepository.findAllByPlayerId(request.getPlayer2Id());
 
-            if (player2InformationEntity == null) {
-                logger.error("PLAYER2 ID NOT FOUND");
+            if (playerInformationEntity == null) {
+                logger.error("PLAYER ID NOT FOUND");
                 response.setStatus(Status.NOT_FOUND.getValue());
                 ErrorResponse error = new ErrorResponse();
-                error.setError("PLAYER2 ID NOT FOUND");
+                error.setError("PLAYER ID NOT FOUND");
                 response.setData(error);
                 response.setHttpStatus(HttpStatus.NOT_FOUND);
 
             } else {
-                logger.info("PLAYER2 ID FOUND");
-                GameDataEntity entity = new GameDataEntity();
-                entity.setGameId(UUID.randomUUID());
-                entity.setGamePlayerId(playerInformationEntity.getPlayerId());
-                entity.setGamePlayer2Id(player2InformationEntity.getPlayerId());
-                entity.setTableSize(request.getTableSize());
-                entity.setGameStatus("NOT FINISHED");
-                entity.setGameResult("NOT FINISHED");
-                Date date = Calendar.getInstance().getTime();
-                entity.setGameCreatedDate(date);
-                entity.setGameUpdatedDate(date);
+                PlayerInformationEntity player2InformationEntity = playerInformationRepository.findAllByPlayerId(request.getPlayer2Id());
+                if (player2InformationEntity == null) {
+                    logger.error("PLAYER2 ID NOT FOUND");
+                    response.setStatus(Status.NOT_FOUND.getValue());
+                    ErrorResponse error = new ErrorResponse();
+                    error.setError("PLAYER2 ID NOT FOUND");
+                    response.setData(error);
+                    response.setHttpStatus(HttpStatus.NOT_FOUND);
 
-                GameDataEntity saveEntity = gameDataRepository.save(entity);
+                } else {
+                    logger.info("BOTH PLAYER ID FOUND");
+                    GameDataEntity entity = new GameDataEntity();
+                    entity.setGameId(UUID.randomUUID());
+                    entity.setGamePlayerId(playerInformationEntity.getPlayerId());
+                    entity.setGamePlayer2Id(player2InformationEntity.getPlayerId());
+                    entity.setTableSize(request.getTableSize());
+                    entity.setGameStatus("NOT FINISHED");
+                    entity.setGameResult("NOT FINISHED");
+                    Date date = Calendar.getInstance().getTime();
+                    entity.setGameCreatedDate(date);
+                    entity.setGameUpdatedDate(date);
 
-                response.setStatus(Status.SUCCESS.getValue());
-                PlayerStartResponse playerStartResponse = new PlayerStartResponse();
-                playerStartResponse.setGameId(saveEntity.getGameId());
-                playerStartResponse.setGameType("MULTI PLAYER");
-                response.setData(playerStartResponse);
-                response.setHttpStatus(HttpStatus.CREATED);
+                    GameDataEntity saveEntity = gameDataRepository.save(entity);
+
+                    response.setStatus(Status.SUCCESS.getValue());
+                    PlayerStartResponse playerStartResponse = new PlayerStartResponse();
+                    playerStartResponse.setGameId(saveEntity.getGameId());
+                    playerStartResponse.setGameType("MULTI PLAYER");
+                    response.setData(playerStartResponse);
+                    response.setHttpStatus(HttpStatus.CREATED);
+                }
             }
         }
         return response;
