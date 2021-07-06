@@ -6,6 +6,7 @@ import com.demo.tictactoe.model.entity.PlayerInformationEntity;
 import com.demo.tictactoe.model.request.PlayerLoginRequest;
 import com.demo.tictactoe.model.request.PlayerStartRequest;
 import com.demo.tictactoe.model.response.CommonResponse;
+import com.demo.tictactoe.model.response.ErrorResponse;
 import com.demo.tictactoe.model.response.PlayerLoginResponse;
 import com.demo.tictactoe.model.response.PlayerStartResponse;
 import com.demo.tictactoe.repository.BoardDataRepository;
@@ -149,7 +150,7 @@ public class TicTacToeServiceTest {
     }
 
     @Test
-    public void fail_playerStart_duplicatePlayerIdOnMultiPlayerGameType(){
+    public void fail_playerStart_duplicatePlayerId_multiPlayerGameType(){
 
         PlayerInformationEntity entity = new PlayerInformationEntity();
         UUID resultUUID = UUID.randomUUID();
@@ -180,4 +181,98 @@ public class TicTacToeServiceTest {
 
         }
     }
+
+    @Test
+    public void fail_playerStart_notFoundPlayerId_soloGameType(){
+        PlayerInformationEntity entity = new PlayerInformationEntity();
+        UUID resultUUID = UUID.randomUUID();
+        entity.setPlayerId(resultUUID);
+        entity.setPlayerName("Mock Player Name1");
+        entity.setPlayerAge(20);
+        entity.setPlayerCreatedDate(Calendar.getInstance().getTime());
+
+        Mockito.when(playerInformationRepository.findAllByPlayerId(any())).thenReturn(null);
+
+        PlayerStartRequest request = new PlayerStartRequest();
+        request.setPlayerId(resultUUID);
+        request.setTableSize(3);
+
+        CommonResponse commonResponse = ticTacToeService.playerStart(request);
+
+        ErrorResponse errorResponse = (ErrorResponse) commonResponse.getData();
+
+        assertEquals("PLAYER ID NOT FOUND",errorResponse.getError());
+        assertEquals("NOT_FOUND",commonResponse.getStatus());
+        assertEquals(HttpStatus.NOT_FOUND,commonResponse.getHttpStatus());
+
+    }
+
+    @Test
+    public void fail_playerStart_notFoundPlayer_multiPlayerGameType(){
+
+        PlayerInformationEntity entity = new PlayerInformationEntity();
+        UUID resultUUID = UUID.randomUUID();
+        entity.setPlayerId(resultUUID);
+        entity.setPlayerName("Mock Player Name1");
+        entity.setPlayerAge(20);
+        entity.setPlayerCreatedDate(Calendar.getInstance().getTime());
+
+        PlayerInformationEntity entity2 = new PlayerInformationEntity();
+        UUID resultUUID2 = UUID.randomUUID();
+        entity2.setPlayerId(resultUUID2);
+        entity2.setPlayerName("Mock Player Name2");
+        entity2.setPlayerAge(20);
+        entity2.setPlayerCreatedDate(Calendar.getInstance().getTime());
+
+        Mockito.doReturn(null,entity2).when(playerInformationRepository).findAllByPlayerId(any());
+
+        PlayerStartRequest request = new PlayerStartRequest();
+        request.setPlayerId(resultUUID);
+        request.setPlayer2Id(resultUUID2);
+        request.setTableSize(3);
+
+        CommonResponse commonResponse = ticTacToeService.playerStart(request);
+
+        ErrorResponse errorResponse = (ErrorResponse) commonResponse.getData();
+
+        assertEquals("PLAYER ID NOT FOUND",errorResponse.getError());
+        assertEquals("NOT_FOUND",commonResponse.getStatus());
+        assertEquals(HttpStatus.NOT_FOUND,commonResponse.getHttpStatus());
+
+    }
+
+    @Test
+    public void fail_playerStart_notFoundPlayer2_multiPlayerGameType(){
+
+        PlayerInformationEntity entity = new PlayerInformationEntity();
+        UUID resultUUID = UUID.randomUUID();
+        entity.setPlayerId(resultUUID);
+        entity.setPlayerName("Mock Player Name1");
+        entity.setPlayerAge(20);
+        entity.setPlayerCreatedDate(Calendar.getInstance().getTime());
+
+        PlayerInformationEntity entity2 = new PlayerInformationEntity();
+        UUID resultUUID2 = UUID.randomUUID();
+        entity2.setPlayerId(resultUUID2);
+        entity2.setPlayerName("Mock Player Name2");
+        entity2.setPlayerAge(20);
+        entity2.setPlayerCreatedDate(Calendar.getInstance().getTime());
+
+        Mockito.doReturn(entity,null).when(playerInformationRepository).findAllByPlayerId(any());
+
+        PlayerStartRequest request = new PlayerStartRequest();
+        request.setPlayerId(resultUUID);
+        request.setPlayer2Id(resultUUID2);
+        request.setTableSize(3);
+
+        CommonResponse commonResponse = ticTacToeService.playerStart(request);
+
+        ErrorResponse errorResponse = (ErrorResponse) commonResponse.getData();
+
+        assertEquals("PLAYER2 ID NOT FOUND",errorResponse.getError());
+        assertEquals("NOT_FOUND",commonResponse.getStatus());
+        assertEquals(HttpStatus.NOT_FOUND,commonResponse.getHttpStatus());
+
+    }
+
 }
