@@ -3,6 +3,7 @@ package com.demo.tictactoe.model.entity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.util.Date;
 import java.util.UUID;
 
 @Entity(name = "board_data")
@@ -15,14 +16,14 @@ public class BoardDataEntity {
     @Column(name = "board_game_id")
     private UUID boardGameId;
 
-    @Column(name = "move_round")
-    private Integer moveRound;
-
     @Column(name = "cell_row")
     private Integer cellRow;
 
     @Column(name = "cell_column")
     private Integer cellColumn;
+
+    @Column(name = "move_date")
+    private Date moveDate;
 
     public UUID getBoardId() {
         return boardId;
@@ -38,14 +39,6 @@ public class BoardDataEntity {
 
     public void setBoardGameId(UUID boardGameId) {
         this.boardGameId = boardGameId;
-    }
-
-    public Integer getMoveRound() {
-        return moveRound;
-    }
-
-    public void setMoveRound(Integer moveRound) {
-        this.moveRound = moveRound;
     }
 
     public Integer getCellRow() {
@@ -64,14 +57,22 @@ public class BoardDataEntity {
         this.cellColumn = cellColumn;
     }
 
+    public Date getMoveDate() {
+        return moveDate;
+    }
+
+    public void setMoveDate(Date moveDate) {
+        this.moveDate = moveDate;
+    }
+
     @Override
     public String toString() {
         return "BoardDataEntity{" +
                 "boardId=" + boardId +
                 ", boardGameId=" + boardGameId +
-                ", moveRound=" + moveRound +
                 ", cellRow=" + cellRow +
                 ", cellColumn=" + cellColumn +
+                ", moveDate=" + moveDate +
                 '}';
     }
 }

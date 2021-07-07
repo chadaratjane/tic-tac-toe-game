@@ -1,6 +1,7 @@
 package com.demo.tictactoe.controller;
 
 import com.demo.tictactoe.model.request.PlayerLoginRequest;
+import com.demo.tictactoe.model.request.PlayerMoveRequest;
 import com.demo.tictactoe.model.request.PlayerStartRequest;
 import com.demo.tictactoe.model.response.CommonResponse;
 import com.demo.tictactoe.service.TicTacToeService;
@@ -9,11 +10,13 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.UUID;
 
 @RestController
 public class TicTacToeController {
@@ -40,5 +43,13 @@ public class TicTacToeController {
         return new ResponseEntity<>(commonResponse, commonResponse.getHttpStatus());
     }
 
+    @PostMapping(value = "/{gameId}/move", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<CommonResponse> playerMove(@Valid @RequestBody PlayerMoveRequest request,
+                                                     @PathVariable("gameId") UUID gameId ) {
+        logger.info("START IMPLEMENTING PLAYER MOVE");
+        CommonResponse commonResponse = ticTacToeService.playerMove(request,gameId);
+        logger.info("END IMPLEMENTING PLAYER MOVE, response : {}", commonResponse);
+        return new ResponseEntity<>(commonResponse, commonResponse.getHttpStatus());
+    }
 
 }

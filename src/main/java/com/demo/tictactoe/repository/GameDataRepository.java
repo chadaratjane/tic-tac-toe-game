@@ -8,4 +8,7 @@ import java.util.UUID;
 
 @Repository
 public interface GameDataRepository extends JpaRepository<GameDataEntity, UUID> {
+
+    GameDataEntity findAllByGameId(UUID gameId);
+
 }
