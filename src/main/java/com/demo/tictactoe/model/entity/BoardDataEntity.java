@@ -16,6 +16,9 @@ public class BoardDataEntity {
     @Column(name = "board_game_id")
     private UUID boardGameId;
 
+    @Column(name="board_player_id")
+    private UUID boardPlayerId;
+
     @Column(name = "cell_row")
     private Integer cellRow;
 
@@ -39,6 +42,14 @@ public class BoardDataEntity {
 
     public void setBoardGameId(UUID boardGameId) {
         this.boardGameId = boardGameId;
+    }
+
+    public UUID getBoardPlayerId() {
+        return boardPlayerId;
+    }
+
+    public void setBoardPlayerId(UUID boardPlayerId) {
+        this.boardPlayerId = boardPlayerId;
     }
 
     public Integer getCellRow() {
@@ -70,6 +81,7 @@ public class BoardDataEntity {
         return "BoardDataEntity{" +
                 "boardId=" + boardId +
                 ", boardGameId=" + boardGameId +
+                ", boardPlayerId=" + boardPlayerId +
                 ", cellRow=" + cellRow +
                 ", cellColumn=" + cellColumn +
                 ", moveDate=" + moveDate +
