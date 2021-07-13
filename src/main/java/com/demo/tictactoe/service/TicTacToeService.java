@@ -175,19 +175,17 @@ public class TicTacToeService {
             logger.error("GAME FOUND");
             //TODO check availability
             List<BoardDataEntity> boardDataEntityList = boardDataRepository.findAllByBoardGameId(gameDataEntity.getGameId());
-            Character [][] board;
-            if (boardDataEntityList.isEmpty()) {
-                board = new Character[3][3];
-                board[request.getCellRow() - 1][request.getCellColumn() - 1] = 'X';
+            Character [][] board = new Character[3][3];
+            if (!boardDataEntityList.isEmpty()) {
 
-            } else {
-                board = new Character[3][3];
                 for (BoardDataEntity item : boardDataEntityList) {
                     if (request.getCellRow() == item.getCellRow() && request.getCellColumn() == item.getCellColumn()) {
                         throw new ValidateException("YOUR SELECTED CELL IS NOT EMPTY", "YOUR SELECTED CELL IS NOT EMPTY");
 
                     }
-                    if (item.getBoardPlayerId().equals(UUID.fromString("99999999-9999-9999-9999-999999999999"))) {
+                    boolean isBot = UUID.fromString("99999999-9999-9999-9999-999999999999").equals(item.getBoardPlayerId());
+                    boolean isPlayer2 = gameDataEntity.getGamePlayer2Id() != null;
+                    if (isBot || isPlayer2) {
                         board[item.getCellRow() - 1][item.getCellColumn() - 1] = 'O';
 
                     } else {
@@ -195,7 +193,15 @@ public class TicTacToeService {
 
                     }
                 }
+            }
+
+            boolean isPlayer2 = gameDataEntity.getGamePlayer2Id() == request.getPlayerId();
+            if (isPlayer2) {
+                board[request.getCellRow() - 1][request.getCellColumn() - 1] = 'O';
+
+            } else {
                 board[request.getCellRow() - 1][request.getCellColumn() - 1] = 'X';
+
             }
 
             if (gameDataEntity.getGameType().equals(GameType.SOLO.getValue())) {
