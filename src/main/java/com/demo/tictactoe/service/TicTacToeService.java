@@ -23,13 +23,10 @@ import com.demo.tictactoe.repository.PlayerInformationRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -155,6 +152,7 @@ public class TicTacToeService {
     }
 
     public CommonResponse playerMove(PlayerMoveRequest request, UUID gameId) {
+        //TODO add to find gameStatus >> in progress
         GameDataEntity gameDataEntity = gameDataRepository.findAllByGameId(gameId);
         Integer tableSize = gameDataEntity.getTableSize();
         if (request.getCellRow() > tableSize || request.getCellColumn() > tableSize) {
@@ -164,18 +162,18 @@ public class TicTacToeService {
         CommonResponse response = new CommonResponse();
 
         if (gameDataEntity == null) {
-            logger.error("GAME NOT FOUND");
+            logger.error("GAME NOT FOUND OR GAME END");
             response.setStatus(Status.NOT_FOUND.getValue());
             ErrorResponse error = new ErrorResponse();
-            error.setError("GAME NOT FOUND");
+            error.setError("GAME NOT FOUND OR GAME END");
             response.setData(error);
+            //TODO bad request or not found
             response.setHttpStatus(HttpStatus.NOT_FOUND);
 
         } else {
             logger.error("GAME FOUND");
-            //TODO check availability
             List<BoardDataEntity> boardDataEntityList = boardDataRepository.findAllByBoardGameId(gameDataEntity.getGameId());
-            Character [][] board = new Character[3][3];
+            Character [][] board = new Character[gameDataEntity.getTableSize()][gameDataEntity.getTableSize()];
             if (!boardDataEntityList.isEmpty()) {
 
                 for (BoardDataEntity item : boardDataEntityList) {
@@ -184,7 +182,7 @@ public class TicTacToeService {
 
                     }
                     boolean isBot = UUID.fromString("99999999-9999-9999-9999-999999999999").equals(item.getBoardPlayerId());
-                    boolean isPlayer2 = gameDataEntity.getGamePlayer2Id() != null;
+                    boolean isPlayer2 = item.getBoardPlayerId().equals(gameDataEntity.getGamePlayer2Id());
                     if (isBot || isPlayer2) {
                         board[item.getCellRow() - 1][item.getCellColumn() - 1] = 'O';
 
@@ -195,8 +193,8 @@ public class TicTacToeService {
                 }
             }
 
-            boolean isPlayer2 = gameDataEntity.getGamePlayer2Id() == request.getPlayerId();
-            if (isPlayer2) {
+            boolean isPlayer2CurrentTurn = gameDataEntity.getGamePlayer2Id() == request.getPlayerId();
+            if (isPlayer2CurrentTurn) {
                 board[request.getCellRow() - 1][request.getCellColumn() - 1] = 'O';
 
             } else {
@@ -204,7 +202,7 @@ public class TicTacToeService {
 
             }
 
-            if (gameDataEntity.getGameType().equals(GameType.SOLO.getValue())) {
+            if (GameType.SOLO.getValue().equals(gameDataEntity.getGameType())) {
 
                 BoardDataEntity entity = new BoardDataEntity();
                 entity.setBoardId(UUID.randomUUID());
@@ -216,16 +214,11 @@ public class TicTacToeService {
 
                 BoardDataEntity saveBoardEntity = boardDataRepository.save(entity);
 
-                GameDataEntity updateGameEntity = new GameDataEntity();
-                updateGameEntity.setGameId(gameDataEntity.getGameId());
-                updateGameEntity.setGamePlayerId(gameDataEntity.getGamePlayerId());
-                updateGameEntity.setTableSize(gameDataEntity.getTableSize());
-                updateGameEntity.setGameType(gameDataEntity.getGameType());
-                updateGameEntity.setGameStatus(checkGameStatus('X',board));
-                updateGameEntity.setGameCreatedDate(gameDataEntity.getGameCreatedDate());
-                updateGameEntity.setGameUpdatedDate(Calendar.getInstance().getTime());
+                String gameStatus = checkGameStatus('X', board);
+                gameDataEntity.setGameStatus(gameStatus);
+                gameDataEntity.setGameUpdatedDate(Calendar.getInstance().getTime());
 
-                GameDataEntity savePlayer1GameEntity = gameDataRepository.save(updateGameEntity);
+                GameDataEntity savePlayer1GameEntity = gameDataRepository.save(gameDataEntity);
 
                 response.setStatus(Status.SUCCESS.getValue());
                 MoveResponse moveResponse = new MoveResponse();
@@ -238,58 +231,89 @@ public class TicTacToeService {
                 response.setHttpStatus(HttpStatus.CREATED);
 
                 //find null\
-                List<Position> availablePositionList = new ArrayList<>();
-                for (int row = 0; row < 3; row++)
-                    for (int column = 0; column < 3; column++) {
-                        if (board[row][column] == null) {
-                            Position available = new Position();
-                            available.setRow(row);
-                            available.setColumn(column);
-                            availablePositionList.add(available);
+                if (GameStatus.IN_PROGRESS.getValue().equals(gameStatus)){
+
+                    List<Position> availablePositionList = new ArrayList<>();
+                    for (int row = 0; row < gameDataEntity.getTableSize(); row++)
+                        for (int column = 0; column < gameDataEntity.getTableSize(); column++) {
+                            if (board[row][column] == null) {
+                                Position available = new Position();
+                                available.setRow(row);
+                                available.setColumn(column);
+                                availablePositionList.add(available);
+
+                            }
+                        }
+
+                        Random random = new Random();
+                        Integer randomNumber = random.nextInt(availablePositionList.size());
+                        Position randomPosition = availablePositionList.get(randomNumber);
+
+                        board[randomPosition.getRow()][randomPosition.getColumn()] = 'O';
+
+                        BoardDataEntity entity2 = new BoardDataEntity();
+                        entity2.setBoardId(UUID.randomUUID());
+                        entity2.setBoardGameId(gameDataEntity.getGameId());
+                        entity2.setBoardPlayerId(UUID.fromString("99999999-9999-9999-9999-999999999999"));
+                        entity2.setCellRow(randomPosition.getRow()+1);
+                        entity2.setCellColumn(randomPosition.getColumn()+1);
+                        entity2.setMoveDate(Calendar.getInstance().getTime());
+
+                        BoardDataEntity saveBotMoveBoardEntity = boardDataRepository.save(entity2);
+
+                        MoveDetailsResponse moveDetailsBot = new MoveDetailsResponse();
+                        moveDetailsBot.setCellRow(saveBotMoveBoardEntity.getCellRow());
+                        moveDetailsBot.setCellColumn(saveBotMoveBoardEntity.getCellColumn());
+                        String botGameStatus = checkGameStatus('O', board);
+                        if (GameStatus.WIN.getValue().equals(botGameStatus)){
+                            gameDataEntity.setGameStatus(GameStatus.LOSS.getValue());
+                            gameDataEntity.setGameUpdatedDate(Calendar.getInstance().getTime());
+
+                            gameDataRepository.save(gameDataEntity);
 
                         }
-                    }
-
-                if (availablePositionList.size() == 0) {
-
-                    MoveDetailsResponse moveDetailsBot = new MoveDetailsResponse();
-                    moveDetailsBot.setCellRow(null);
-                    moveDetailsBot.setCellColumn(null);
-                    moveDetailsBot.setGameStatus(GameStatus.DRAW.getValue());
-                    moveResponse.setBot(moveDetailsBot);
-
-                } else {
-                    Random random = new Random();
-                    Integer randomNumber = random.nextInt(availablePositionList.size());
-                    Position randomPosition = availablePositionList.get(randomNumber);
-
-                    board[randomPosition.getRow()][randomPosition.getColumn()] = 'O';
-
-                    BoardDataEntity entity2 = new BoardDataEntity();
-                    entity2.setBoardId(UUID.randomUUID());
-                    entity2.setBoardGameId(gameDataEntity.getGameId());
-                    entity2.setBoardPlayerId(UUID.fromString("99999999-9999-9999-9999-999999999999"));
-                    entity2.setCellRow(randomPosition.getRow()+1);
-                    entity2.setCellColumn(randomPosition.getColumn()+1);
-                    entity2.setMoveDate(Calendar.getInstance().getTime());
-
-                    BoardDataEntity saveBotMoveBoardEntity = boardDataRepository.save(entity2);
-
-                    MoveDetailsResponse moveDetailsBot = new MoveDetailsResponse();
-                    moveDetailsBot.setCellRow(saveBotMoveBoardEntity.getCellRow());
-                    moveDetailsBot.setCellColumn(saveBotMoveBoardEntity.getCellColumn());
-                    if (savePlayer1GameEntity.getGameStatus().equals(GameStatus.WIN.getValue())) {
-                        moveDetailsBot.setGameStatus(GameStatus.LOSS.getValue());
-                    } else {
-                        moveDetailsBot.setGameStatus(checkGameStatus('O', board));
-                    }
-                    moveResponse.setBot(moveDetailsBot);
+                        moveDetailsBot.setGameStatus(botGameStatus);
+                        moveResponse.setBot(moveDetailsBot);
                 }
 
                 response.setData(moveResponse);
 
-            }
+            }else{
 
+                //TODO check turn that is for player1 or player2
+                BoardDataEntity entity = new BoardDataEntity();
+
+                if (isPlayer2CurrentTurn){
+                    //
+
+                }
+                entity.setBoardId(UUID.randomUUID());
+                entity.setBoardGameId(gameDataEntity.getGameId());
+                entity.setBoardPlayerId(gameDataEntity.getGamePlayerId());
+                entity.setCellRow(request.getCellRow());
+                entity.setCellColumn(request.getCellColumn());
+                entity.setMoveDate(Calendar.getInstance().getTime());
+
+                BoardDataEntity saveBoardEntity = boardDataRepository.save(entity);
+
+                String gameStatus = checkGameStatus('X', board);
+                gameDataEntity.setGameStatus(gameStatus);
+                gameDataEntity.setGameUpdatedDate(Calendar.getInstance().getTime());
+
+                GameDataEntity savePlayer1GameEntity = gameDataRepository.save(gameDataEntity);
+
+                response.setStatus(Status.SUCCESS.getValue());
+                MoveResponse moveResponse = new MoveResponse();
+                MoveDetailsResponse moveDetailsPlayer = new MoveDetailsResponse();
+                moveDetailsPlayer.setCellRow(saveBoardEntity.getCellRow());
+                moveDetailsPlayer.setCellColumn(saveBoardEntity.getCellColumn());
+                moveDetailsPlayer.setGameStatus(savePlayer1GameEntity.getGameStatus());
+                moveResponse.setPlayer(moveDetailsPlayer);
+                response.setData(moveResponse);
+                response.setHttpStatus(HttpStatus.CREATED);
+                response.setData(moveResponse);
+
+            }
         }
         return response;
     }
@@ -306,21 +330,15 @@ public class TicTacToeService {
         String result;
 
         boolean checkWin = false;
-        //Vertical  00,10,20 | 01,11,21 | 02,12,22
-        for (int i = 0; i < 3; i++) {
+        if (checkWinVertical(mark, board)) {
+            return GameStatus.WIN.getValue();
 
-            if (board[0][i] == mark&&board[1][i]==mark&&board[2][i]==mark){
-                checkWin = true;
-            }
         }
-        //horizontal 00,01,02 | 10,11,12 | 20,21,22
-        for (int i = 0; i < 3; i++) {
-
-            if (board[i][0] == mark&&board[i][1]==mark&&board[i][2]==mark){
-                checkWin = true;
-            }
+        else if (checkWinHorizontal(mark, board)) {
+            return GameStatus.WIN.getValue();
         }
         //diagonal 00,11,22 | 02,11,20
+        //TODO improve if table size not 3 for diagonal
         if (board[0][0] == mark&&board[1][1]==mark&&board[2][2]==mark){
             checkWin = true;
         }
@@ -335,14 +353,14 @@ public class TicTacToeService {
             //check draw
             int count = 0;
 
-            for (int r = 0; r < 3; r++) {
-                for (int c = 0; c < 3; c++) {
+            for (int r = 0; r < board.length; r++) {
+                for (int c = 0; c < board.length; c++) {
                     if (board[r][c] != null) {
                         count++;
                     }
                 }
             }
-            if (count == 9) {
+            if (count == board.length*board.length) {
                 result = GameStatus.DRAW.getValue();
 
             } else {
@@ -351,6 +369,39 @@ public class TicTacToeService {
             }
         }
         return result;
+    }
+
+    private boolean checkWinHorizontal(Character mark, Character[][] board) {
+        //horizontal 00,01,02 | 10,11,12 | 20,21,22
+        for (int row = 0; row < board.length; row++) {
+            int count = 0;
+            for (int column = 0; column < board.length; column++) {
+                if (board[row][column] == mark) {
+                    count++;
+                }
+            }
+            if (count == board.length) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean checkWinVertical(Character mark, Character[][] board) {
+        //Vertical  00,10,20 | 01,11,21 | 02,12,22
+        for (int column = 0; column < board.length; column++) {
+            int count = 0;
+            for (int row = 0; row < board.length; row++) {
+
+                if (board[column][row] == mark) {
+                    count++;
+                }
+            }
+            if (count == board.length) {
+                return true;
+            }
+        }
+        return false;
     }
 }
 
