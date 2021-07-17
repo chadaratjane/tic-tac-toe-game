@@ -1,6 +1,7 @@
 package com.demo.tictactoe.model.request;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.util.UUID;
 
 public class PlayerMoveRequest {
@@ -9,9 +10,11 @@ public class PlayerMoveRequest {
     private UUID playerId;
 
     @NotNull(message = "cell row is invalid")
+    @Positive(message = "cell row is invalid, please input positive")
     private Integer cellRow;
 
     @NotNull(message = "cell column is invalid")
+    @Positive(message = "cell column is invalid, please input positive")
     private Integer cellColumn;
 
     public UUID getPlayerId() {

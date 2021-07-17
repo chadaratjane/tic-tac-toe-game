@@ -19,8 +19,24 @@ public class PlayerInformationEntity {
     @Column (name = "player_age")
     private Integer playerAge;
 
+    @Column (name = "player_total_win")
+    private Integer playerTotalWin;
+
+    @Column (name = "player_total_lose")
+    private Integer playerTotalLose;
+
+    @Column (name = "player_total_draw")
+    private Integer playerTotalDraw;
+
+    @Column (name = "player_total_game")
+    private Integer playerTotalGame;
+
     @Column (name = "player_created_date")
     private Date playerCreatedDate;
+
+    @Column (name = "player_updated_date")
+    private Date playerUpdatedDate;
+
 
     public UUID getPlayerId() {
         return playerId;
@@ -54,13 +70,58 @@ public class PlayerInformationEntity {
         this.playerCreatedDate = playerCreatedDate;
     }
 
+    public Integer getPlayerTotalWin() {
+        return playerTotalWin;
+    }
+
+    public void setPlayerTotalWin(Integer playerTotalWin) {
+        this.playerTotalWin = playerTotalWin;
+    }
+
+    public Integer getPlayerTotalLose() {
+        return playerTotalLose;
+    }
+
+    public void setPlayerTotalLose(Integer playerTotalLose) {
+        this.playerTotalLose = playerTotalLose;
+    }
+
+    public Integer getPlayerTotalDraw() {
+        return playerTotalDraw;
+    }
+
+    public void setPlayerTotalDraw(Integer playerTotalDraw) {
+        this.playerTotalDraw = playerTotalDraw;
+    }
+
+    public Integer getPlayerTotalGame() {
+        return playerTotalGame;
+    }
+
+    public void setPlayerTotalGame(Integer playerTotalGame) {
+        this.playerTotalGame = playerTotalGame;
+    }
+
+    public Date getPlayerUpdatedDate() {
+        return playerUpdatedDate;
+    }
+
+    public void setPlayerUpdatedDate(Date playerUpdatedDate) {
+        this.playerUpdatedDate = playerUpdatedDate;
+    }
+
     @Override
     public String toString() {
-        return "BoardDataEntity{" +
+        return "PlayerInformationEntity{" +
                 "playerId=" + playerId +
                 ", playerName='" + playerName + '\'' +
-                ", playerAge='" + playerAge + '\'' +
-                ", player_created_date=" + playerCreatedDate +
+                ", playerAge=" + playerAge +
+                ", playerTotalWin=" + playerTotalWin +
+                ", playerTotalLose=" + playerTotalLose +
+                ", playerTotalDraw=" + playerTotalDraw +
+                ", playerTotalGame=" + playerTotalGame +
+                ", playerCreatedDate=" + playerCreatedDate +
+                ", playerUpdatedDate=" + playerUpdatedDate +
                 '}';
     }
 
