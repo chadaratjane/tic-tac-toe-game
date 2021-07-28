@@ -108,8 +108,8 @@ public class TicTacToeService {
             }
         } else {
             logger.info("GAME TYPE IS MULTI PLAYER");
-            if (request.getPlayerId().equals(request.getPlayer2Id())){
-            throw new ValidateException("DUPLICATE ID FOR BOTH PLAYERS","DUPLICATE ID FOR BOTH PLAYERS");
+            if (request.getPlayerId().equals(request.getPlayer2Id())) {
+                throw new ValidateException("DUPLICATE ID FOR BOTH PLAYERS", "DUPLICATE ID FOR BOTH PLAYERS");
 
             }
             if (playerInformationEntity == null) {
@@ -159,7 +159,7 @@ public class TicTacToeService {
 
     public CommonResponse playerMove(PlayerMoveRequest request, UUID gameId) {
 
-        GameDataEntity gameDataEntity = gameDataRepository.findAllByGameIdAndGameStatus(gameId,GameStatus.IN_PROGRESS.getValue());
+        GameDataEntity gameDataEntity = gameDataRepository.findAllByGameIdAndGameStatus(gameId, GameStatus.IN_PROGRESS.getValue());
 
         CommonResponse response = new CommonResponse();
         if (gameDataEntity == null) {
@@ -178,7 +178,7 @@ public class TicTacToeService {
 
             }
             List<BoardDataEntity> boardDataEntityList = boardDataRepository.findAllByBoardGameId(gameDataEntity.getGameId());
-            Character [][] board = new Character[gameDataEntity.getTableSize()][gameDataEntity.getTableSize()];
+            Character[][] board = new Character[gameDataEntity.getTableSize()][gameDataEntity.getTableSize()];
             if (!boardDataEntityList.isEmpty()) {
 
                 for (BoardDataEntity item : boardDataEntityList) {
@@ -235,7 +235,7 @@ public class TicTacToeService {
                 response.setData(moveResponse);
                 response.setHttpStatus(HttpStatus.CREATED);
 
-                if (GameStatus.IN_PROGRESS == gameStatus){
+                if (GameStatus.IN_PROGRESS == gameStatus) {
 
                     List<Position> availablePositionList = new ArrayList<>();
                     for (int row = 0; row < gameDataEntity.getTableSize(); row++)
@@ -249,46 +249,46 @@ public class TicTacToeService {
                             }
                         }
 
-                        Random random = new Random();
-                        Integer randomNumber = random.nextInt(availablePositionList.size());
-                        Position randomPosition = availablePositionList.get(randomNumber);
+                    Random random = new Random();
+                    Integer randomNumber = random.nextInt(availablePositionList.size());
+                    Position randomPosition = availablePositionList.get(randomNumber);
 
-                        board[randomPosition.getRow()][randomPosition.getColumn()] = 'O';
+                    board[randomPosition.getRow()][randomPosition.getColumn()] = 'O';
 
-                        BoardDataEntity entity2 = new BoardDataEntity();
-                        entity2.setBoardId(UUID.randomUUID());
-                        entity2.setBoardGameId(gameDataEntity.getGameId());
-                        entity2.setBoardPlayerId(UUID.fromString("99999999-9999-9999-9999-999999999999"));
-                        entity2.setCellRow(randomPosition.getRow()+1);
-                        entity2.setCellColumn(randomPosition.getColumn()+1);
-                        entity2.setMoveDate(Calendar.getInstance().getTime());
+                    BoardDataEntity entity2 = new BoardDataEntity();
+                    entity2.setBoardId(UUID.randomUUID());
+                    entity2.setBoardGameId(gameDataEntity.getGameId());
+                    entity2.setBoardPlayerId(UUID.fromString("99999999-9999-9999-9999-999999999999"));
+                    entity2.setCellRow(randomPosition.getRow() + 1);
+                    entity2.setCellColumn(randomPosition.getColumn() + 1);
+                    entity2.setMoveDate(Calendar.getInstance().getTime());
 
-                        BoardDataEntity saveBotMoveBoardEntity = boardDataRepository.save(entity2);
+                    BoardDataEntity saveBotMoveBoardEntity = boardDataRepository.save(entity2);
 
-                        MoveDetailsResponse moveDetailsBot = new MoveDetailsResponse();
-                        moveDetailsBot.setCellRow(saveBotMoveBoardEntity.getCellRow());
-                        moveDetailsBot.setCellColumn(saveBotMoveBoardEntity.getCellColumn());
-                        GameStatus botGameStatus = checkGameStatus('O', board);
-                        if (GameStatus.WIN ==  botGameStatus){
-                            gameDataEntity.setGameStatus(GameStatus.LOSS.getValue());
-                            gameDataEntity.setGameUpdatedDate(Calendar.getInstance().getTime());
+                    MoveDetailsResponse moveDetailsBot = new MoveDetailsResponse();
+                    moveDetailsBot.setCellRow(saveBotMoveBoardEntity.getCellRow());
+                    moveDetailsBot.setCellColumn(saveBotMoveBoardEntity.getCellColumn());
+                    GameStatus botGameStatus = checkGameStatus('O', board);
+                    if (GameStatus.WIN == botGameStatus) {
+                        gameDataEntity.setGameStatus(GameStatus.LOSE.getValue());
+                        gameDataEntity.setGameUpdatedDate(Calendar.getInstance().getTime());
 
-                            gameDataRepository.save(gameDataEntity);
+                        gameDataRepository.save(gameDataEntity);
 
-                            savePlayerStat(saveBoardEntity.getBoardPlayerId(),GameStatus.LOSS);
+                        savePlayerStat(saveBoardEntity.getBoardPlayerId(), GameStatus.LOSE);
 
-                        }
-                        moveDetailsBot.setGameStatus(botGameStatus.getValue());
-                        moveResponse.setBot(moveDetailsBot);
+                    }
+                    moveDetailsBot.setGameStatus(botGameStatus.getValue());
+                    moveResponse.setBot(moveDetailsBot);
 
-                }else {
-                    savePlayerStat(saveBoardEntity.getBoardPlayerId(),gameStatus);
+                } else {
+                    savePlayerStat(saveBoardEntity.getBoardPlayerId(), gameStatus);
 
                 }
 
                 response.setData(moveResponse);
 
-            }else{
+            } else {
                 UUID setBoardPlayerId;
                 GameStatus gameStatus;
                 if (isPlayer2CurrentTurn) {
@@ -298,11 +298,11 @@ public class TicTacToeService {
                     if (GameStatus.IN_PROGRESS != gameStatus) {
                         savePlayerStat(gameDataEntity.getGamePlayer2Id(), gameStatus);
                         if (GameStatus.WIN == gameStatus) {
-                            String gameStatusOfPlayer1 = GameStatus.LOSS.getValue();
+                            String gameStatusOfPlayer1 = GameStatus.LOSE.getValue();
                             gameDataEntity.setGameStatus(gameStatusOfPlayer1);
 
-                            savePlayerStat(gameDataEntity.getGamePlayerId(), GameStatus.LOSS);
-                        } else if (GameStatus.LOSS == gameStatus) {
+                            savePlayerStat(gameDataEntity.getGamePlayerId(), GameStatus.LOSE);
+                        } else if (GameStatus.LOSE == gameStatus) {
                             savePlayerStat(gameDataEntity.getGamePlayerId(), GameStatus.WIN);
                         } else if (GameStatus.DRAW == gameStatus) {
                             savePlayerStat(gameDataEntity.getGamePlayerId(), GameStatus.DRAW);
@@ -317,8 +317,8 @@ public class TicTacToeService {
                     if (GameStatus.IN_PROGRESS != gameStatus) {
                         savePlayerStat(gameDataEntity.getGamePlayerId(), gameStatus);
                         if (GameStatus.WIN == gameStatus) {
-                            savePlayerStat(gameDataEntity.getGamePlayer2Id(), GameStatus.LOSS);
-                        } else if (GameStatus.LOSS == gameStatus) {
+                            savePlayerStat(gameDataEntity.getGamePlayer2Id(), GameStatus.LOSE);
+                        } else if (GameStatus.LOSE == gameStatus) {
                             savePlayerStat(gameDataEntity.getGamePlayer2Id(), GameStatus.WIN);
                         } else if (GameStatus.DRAW == gameStatus) {
                             savePlayerStat(gameDataEntity.getGamePlayer2Id(), GameStatus.DRAW);
@@ -358,16 +358,16 @@ public class TicTacToeService {
         return response;
     }
 
-    public void savePlayerStat(UUID playerId, GameStatus gameStatus){
-        PlayerInformationEntity playerEntity =playerInformationRepository.findAllByPlayerId(playerId);
-        playerEntity.setPlayerTotalGame(playerEntity.getPlayerTotalGame()+1);
+    public void savePlayerStat(UUID playerId, GameStatus gameStatus) {
+        PlayerInformationEntity playerEntity = playerInformationRepository.findAllByPlayerId(playerId);
+        playerEntity.setPlayerTotalGame(playerEntity.getPlayerTotalGame() + 1);
 
-        if (GameStatus.WIN == gameStatus){
-            playerEntity.setPlayerTotalWin(playerEntity.getPlayerTotalWin()+1);
-        }else if (GameStatus.LOSS == gameStatus){
-            playerEntity.setPlayerTotalLose(playerEntity.getPlayerTotalLose()+1);
-        }else if (GameStatus.DRAW == gameStatus){
-            playerEntity.setPlayerTotalDraw(playerEntity.getPlayerTotalDraw()+1);
+        if (GameStatus.WIN == gameStatus) {
+            playerEntity.setPlayerTotalWin(playerEntity.getPlayerTotalWin() + 1);
+        } else if (GameStatus.LOSE == gameStatus) {
+            playerEntity.setPlayerTotalLose(playerEntity.getPlayerTotalLose() + 1);
+        } else if (GameStatus.DRAW == gameStatus) {
+            playerEntity.setPlayerTotalDraw(playerEntity.getPlayerTotalDraw() + 1);
         }
         playerEntity.setPlayerUpdatedDate(Calendar.getInstance().getTime());
 
@@ -375,7 +375,7 @@ public class TicTacToeService {
 
     }
 
-    public GameStatus checkGameStatus(Character mark ,Character [][]board) {
+    public GameStatus checkGameStatus(Character mark, Character[][] board) {
 
         if (checkWinVertical(mark, board)) {
             return GameStatus.WIN;
@@ -420,7 +420,8 @@ public class TicTacToeService {
             if (board[index][index] == mark) {
                 countFirstDiagonal++;
 
-            }  if (board[index][board.length - index - 1] == mark) {
+            }
+            if (board[index][board.length - index - 1] == mark) {
                 countSecondDiagonal++;
 
             }

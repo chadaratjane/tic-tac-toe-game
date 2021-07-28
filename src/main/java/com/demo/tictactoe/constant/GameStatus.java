@@ -4,7 +4,7 @@ public enum GameStatus {
 
     IN_PROGRESS("IN_PROGRESS"),
     WIN("WIN"),
-    LOSS("LOSS"),
+    LOSE("LOSE"),
     DRAW("DRAW");
 
     private String value;
