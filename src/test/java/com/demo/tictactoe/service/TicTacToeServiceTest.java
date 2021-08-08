@@ -304,8 +304,9 @@ public class TicTacToeServiceTest {
 
     }
 
+
     @Test
-    public void success_playerMove_soloGameType_playerMove_inProgressGameStatus(){
+    public void success_playerMove_soloGameType_inProgressGameStatus(){
 
         GameDataEntity gameDataEntity = new GameDataEntity();
         gameDataEntity.setGameId(UUID.randomUUID());
@@ -366,7 +367,7 @@ public class TicTacToeServiceTest {
     }
 
     @Test
-    public void success_playerMove_soloGameType_playerMove_winVerticalGameStatus(){
+    public void success_playerMove_soloGameType_winVerticalGameStatus(){
 
         GameDataEntity gameDataEntity = new GameDataEntity();
         gameDataEntity.setGameId(UUID.randomUUID());
@@ -455,7 +456,7 @@ public class TicTacToeServiceTest {
         updatedPlayerInfo.setPlayerTotalGame(playerInfo.getPlayerTotalGame()+1);
         updatedPlayerInfo.setPlayerUpdatedDate(Calendar.getInstance().getTime());
 
-        Mockito.when(playerInformationRepository.save(any())).thenReturn(playerInfo);
+        Mockito.when(playerInformationRepository.save(any())).thenReturn(updatedPlayerInfo);
 
         PlayerMoveRequest request = new PlayerMoveRequest();
         request.setPlayerId(gameDataEntity.getGamePlayerId());
@@ -483,7 +484,7 @@ public class TicTacToeServiceTest {
     }
 
     @Test
-    public void success_playerMove_soloGameType_playerMove_winHorizontalGameStatus(){
+    public void success_playerMove_soloGameType_winHorizontalGameStatus(){
 
         GameDataEntity gameDataEntity = new GameDataEntity();
         gameDataEntity.setGameId(UUID.randomUUID());
@@ -572,7 +573,7 @@ public class TicTacToeServiceTest {
         updatedPlayerInfo.setPlayerTotalGame(playerInfo.getPlayerTotalGame()+1);
         updatedPlayerInfo.setPlayerUpdatedDate(Calendar.getInstance().getTime());
 
-        Mockito.when(playerInformationRepository.save(any())).thenReturn(playerInfo);
+        Mockito.when(playerInformationRepository.save(any())).thenReturn(updatedPlayerInfo);
 
         PlayerMoveRequest request = new PlayerMoveRequest();
         request.setPlayerId(gameDataEntity.getGamePlayerId());
@@ -600,7 +601,7 @@ public class TicTacToeServiceTest {
     }
 
     @Test
-    public void success_playerMove_soloGameType_playerMove_winDiagonalGameStatus(){
+    public void success_playerMove_soloGameType_winDiagonalGameStatus(){
 
         GameDataEntity gameDataEntity = new GameDataEntity();
         gameDataEntity.setGameId(UUID.randomUUID());
@@ -689,7 +690,7 @@ public class TicTacToeServiceTest {
         updatedPlayerInfo.setPlayerTotalGame(playerInfo.getPlayerTotalGame()+1);
         updatedPlayerInfo.setPlayerUpdatedDate(Calendar.getInstance().getTime());
 
-        Mockito.when(playerInformationRepository.save(any())).thenReturn(playerInfo);
+        Mockito.when(playerInformationRepository.save(any())).thenReturn(updatedPlayerInfo);
 
         PlayerMoveRequest request = new PlayerMoveRequest();
         request.setPlayerId(gameDataEntity.getGamePlayerId());
@@ -717,7 +718,7 @@ public class TicTacToeServiceTest {
     }
 
     @Test
-    public void success_playerMove_soloGameType_playerMove_loseGameStatus(){
+    public void success_playerMove_soloGameType_loseGameStatus(){
 
         GameDataEntity gameDataEntity = new GameDataEntity();
         UUID gameId = UUID.randomUUID();
@@ -862,7 +863,7 @@ public class TicTacToeServiceTest {
     }
 
     @Test
-    public void success_playerMove_soloGameType_playerMove_DrawGameStatus(){
+    public void success_playerMove_soloGameType_DrawGameStatus(){
 
         GameDataEntity gameDataEntity = new GameDataEntity();
         gameDataEntity.setGameId(UUID.randomUUID());
@@ -987,7 +988,7 @@ public class TicTacToeServiceTest {
         updatedPlayerInfo.setPlayerTotalGame(playerInfo.getPlayerTotalGame()+1);
         updatedPlayerInfo.setPlayerUpdatedDate(Calendar.getInstance().getTime());
 
-        Mockito.when(playerInformationRepository.save(any())).thenReturn(playerInfo);
+        Mockito.when(playerInformationRepository.save(any())).thenReturn(updatedPlayerInfo);
 
         PlayerMoveRequest request = new PlayerMoveRequest();
         request.setPlayerId(gameDataEntity.getGamePlayerId());
@@ -1013,5 +1014,1453 @@ public class TicTacToeServiceTest {
         verify(boardDataRepository,times(1)).findAllByBoardGameId(any());
 
     }
+
+
+    @Test
+    public void success_player1Move_multiPlayerGameType_inProgressGameStatus(){
+
+        GameDataEntity gameDataEntity = new GameDataEntity();
+        gameDataEntity.setGameId(UUID.randomUUID());
+        UUID playerId = UUID.randomUUID();
+        gameDataEntity.setGamePlayerId(playerId);
+        UUID player2Id = UUID.randomUUID();
+        gameDataEntity.setGamePlayer2Id(player2Id);
+        gameDataEntity.setTableSize(3);
+        gameDataEntity.setGameType(GameType.MULTI_PLAYER.getValue());
+        gameDataEntity.setGameStatus(GameStatus.IN_PROGRESS.getValue());
+        Date date = Calendar.getInstance().getTime();
+        gameDataEntity.setGameCreatedDate(date);
+        gameDataEntity.setGameUpdatedDate(date);
+
+        Mockito.when(gameDataRepository.findAllByGameIdAndGameStatus(any(),any())).thenReturn(gameDataEntity);
+
+        List<BoardDataEntity> boardDataEntityList = new ArrayList<>();
+
+        Mockito.when(boardDataRepository.findAllByBoardGameId(any())).thenReturn(boardDataEntityList);
+
+        BoardDataEntity playerMove1 = new BoardDataEntity();
+        playerMove1.setBoardId(UUID.randomUUID());
+        playerMove1.setBoardGameId(gameDataEntity.getGameId());
+        playerMove1.setBoardPlayerId(playerId);
+        playerMove1.setCellRow(1);
+        playerMove1.setCellColumn(1);
+        playerMove1.setMoveDate(Calendar.getInstance().getTime());
+
+        Mockito.when(boardDataRepository.save(any())).thenReturn(playerMove1);
+
+        gameDataEntity.setGameStatus(GameStatus.IN_PROGRESS.getValue());
+        gameDataEntity.setGameUpdatedDate(Calendar.getInstance().getTime());
+
+        Mockito.when(gameDataRepository.save(any())).thenReturn(gameDataEntity);
+
+        PlayerMoveRequest request = new PlayerMoveRequest();
+        request.setPlayerId(gameDataEntity.getGamePlayerId());
+        request.setCellRow(1);
+        request.setCellColumn(1);
+
+        CommonResponse commonResponse = ticTacToeService.playerMove(request, gameDataEntity.getGameId());
+
+        MoveResponse moveResponse = (MoveResponse) commonResponse.getData();
+
+        MoveDetailsResponse moveResponsePlayer = moveResponse.getPlayer();
+
+        assertEquals("SUCCESS",commonResponse.getStatus());
+        assertEquals(HttpStatus.CREATED,commonResponse.getHttpStatus());
+        assertEquals("IN_PROGRESS",moveResponsePlayer.getGameStatus());
+        assertEquals(1,moveResponsePlayer.getCellRow());
+        assertEquals(1,moveResponsePlayer.getCellColumn());
+
+        verify(boardDataRepository,times(1)).save(any());
+        verify(gameDataRepository,times(1)).save(any());
+        verify(gameDataRepository,times(1)).findAllByGameIdAndGameStatus(any(),any());
+        verify(boardDataRepository,times(1)).findAllByBoardGameId(any());
+    }
+
+    @Test
+    public void success_player1Move_multiPlayerGameType_winVerticalGameStatus(){
+
+        GameDataEntity gameDataEntity = new GameDataEntity();
+        gameDataEntity.setGameId(UUID.randomUUID());
+        UUID playerId = UUID.randomUUID();
+        gameDataEntity.setGamePlayerId(playerId);
+        UUID player2Id = UUID.randomUUID();
+        gameDataEntity.setGamePlayer2Id(player2Id);
+        gameDataEntity.setTableSize(3);
+        gameDataEntity.setGameType(GameType.MULTI_PLAYER.getValue());
+        gameDataEntity.setGameStatus(GameStatus.IN_PROGRESS.getValue());
+        Date date = Calendar.getInstance().getTime();
+        gameDataEntity.setGameCreatedDate(date);
+        gameDataEntity.setGameUpdatedDate(date);
+
+        Mockito.when(gameDataRepository.findAllByGameIdAndGameStatus(any(),any())).thenReturn(gameDataEntity);
+
+        BoardDataEntity playerMove1 = new BoardDataEntity();
+        playerMove1.setBoardId(UUID.randomUUID());
+        playerMove1.setBoardGameId(gameDataEntity.getGameId());
+        playerMove1.setBoardPlayerId(playerId);
+        playerMove1.setCellRow(1);
+        playerMove1.setCellColumn(1);
+        playerMove1.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move1 = new BoardDataEntity();
+        player2Move1.setBoardId(UUID.randomUUID());
+        player2Move1.setBoardGameId(gameDataEntity.getGameId());
+        player2Move1.setBoardPlayerId(player2Id);
+        player2Move1.setCellRow(1);
+        player2Move1.setCellColumn(2);
+        player2Move1.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity playerMove2 = new BoardDataEntity();
+        playerMove2.setBoardId(UUID.randomUUID());
+        playerMove2.setBoardGameId(gameDataEntity.getGameId());
+        playerMove2.setBoardPlayerId(playerId);
+        playerMove2.setCellRow(2);
+        playerMove2.setCellColumn(1);
+        playerMove2.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move2 = new BoardDataEntity();
+        player2Move2.setBoardId(UUID.randomUUID());
+        player2Move2.setBoardGameId(gameDataEntity.getGameId());
+        player2Move2.setBoardPlayerId(player2Id);
+        player2Move2.setCellRow(3);
+        player2Move2.setCellColumn(2);
+        player2Move2.setMoveDate(Calendar.getInstance().getTime());
+
+        List<BoardDataEntity> boardDataEntityList = new ArrayList<>();
+        boardDataEntityList.add(playerMove1);
+        boardDataEntityList.add(player2Move1);
+        boardDataEntityList.add(playerMove2);
+        boardDataEntityList.add(player2Move2);
+
+        Mockito.when(boardDataRepository.findAllByBoardGameId(any())).thenReturn(boardDataEntityList);
+
+        BoardDataEntity playerMove3 = new BoardDataEntity();
+        playerMove3.setBoardId(UUID.randomUUID());
+        playerMove3.setBoardGameId(gameDataEntity.getGameId());
+        playerMove3.setBoardPlayerId(playerId);
+        playerMove3.setCellRow(3);
+        playerMove3.setCellColumn(1);
+        playerMove3.setMoveDate(Calendar.getInstance().getTime());
+
+        Mockito.when(boardDataRepository.save(any())).thenReturn(playerMove3);
+
+        gameDataEntity.setGameStatus(GameStatus.WIN.getValue());
+        gameDataEntity.setGameUpdatedDate(Calendar.getInstance().getTime());
+
+        Mockito.when(gameDataRepository.save(any())).thenReturn(gameDataEntity);
+
+        PlayerInformationEntity playerInfo = new PlayerInformationEntity();
+        playerInfo.setPlayerId(gameDataEntity.getGamePlayerId());
+        playerInfo.setPlayerName("Mock Name");
+        playerInfo.setPlayerAge(20);
+        playerInfo.setPlayerTotalWin(0);
+        playerInfo.setPlayerTotalLose(0);
+        playerInfo.setPlayerTotalDraw(0);
+        playerInfo.setPlayerTotalGame(0);
+        date = Calendar.getInstance().getTime();
+        playerInfo.setPlayerCreatedDate(date);
+        playerInfo.setPlayerUpdatedDate(date);
+
+        Mockito.when(playerInformationRepository.findAllByPlayerId(any())).thenReturn(playerInfo);
+
+        PlayerInformationEntity updatedPlayerInfo = new PlayerInformationEntity();
+        updatedPlayerInfo.setPlayerTotalWin(playerInfo.getPlayerTotalWin()+1);
+        updatedPlayerInfo.setPlayerTotalGame(playerInfo.getPlayerTotalGame()+1);
+        updatedPlayerInfo.setPlayerUpdatedDate(Calendar.getInstance().getTime());
+
+        Mockito.when(playerInformationRepository.save(any())).thenReturn(updatedPlayerInfo);
+
+        PlayerMoveRequest request = new PlayerMoveRequest();
+        request.setPlayerId(playerId);
+        request.setCellRow(3);
+        request.setCellColumn(1);
+
+        CommonResponse commonResponse = ticTacToeService.playerMove(request, gameDataEntity.getGameId());
+
+        MoveResponse moveResponse = (MoveResponse) commonResponse.getData();
+
+        MoveDetailsResponse moveResponsePlayer = moveResponse.getPlayer();
+
+        assertEquals("SUCCESS",commonResponse.getStatus());
+        assertEquals(HttpStatus.CREATED,commonResponse.getHttpStatus());
+        assertEquals("WIN",moveResponsePlayer.getGameStatus());
+        assertEquals(3,moveResponsePlayer.getCellRow());
+        assertEquals(1,moveResponsePlayer.getCellColumn());
+
+        verify(boardDataRepository,times(1)).save(any());
+        verify(gameDataRepository,times(1)).save(any());
+        verify(playerInformationRepository,times(2)).save(any());
+        verify(gameDataRepository,times(1)).findAllByGameIdAndGameStatus(any(),any());
+        verify(boardDataRepository,times(1)).findAllByBoardGameId(any());
+
+    }
+
+    @Test
+    public void success_player1Move_multiPlayerGameType_winHorizontalGameStatus(){
+
+        GameDataEntity gameDataEntity = new GameDataEntity();
+        gameDataEntity.setGameId(UUID.randomUUID());
+        UUID playerId = UUID.randomUUID();
+        gameDataEntity.setGamePlayerId(playerId);
+        UUID player2Id = UUID.randomUUID();
+        gameDataEntity.setGamePlayer2Id(player2Id);
+        gameDataEntity.setTableSize(3);
+        gameDataEntity.setGameType(GameType.MULTI_PLAYER.getValue());
+        gameDataEntity.setGameStatus(GameStatus.IN_PROGRESS.getValue());
+        Date date = Calendar.getInstance().getTime();
+        gameDataEntity.setGameCreatedDate(date);
+        gameDataEntity.setGameUpdatedDate(date);
+
+        Mockito.when(gameDataRepository.findAllByGameIdAndGameStatus(any(),any())).thenReturn(gameDataEntity);
+
+        BoardDataEntity playerMove1 = new BoardDataEntity();
+        playerMove1.setBoardId(UUID.randomUUID());
+        playerMove1.setBoardGameId(gameDataEntity.getGameId());
+        playerMove1.setBoardPlayerId(playerId);
+        playerMove1.setCellRow(1);
+        playerMove1.setCellColumn(1);
+        playerMove1.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move1 = new BoardDataEntity();
+        player2Move1.setBoardId(UUID.randomUUID());
+        player2Move1.setBoardGameId(gameDataEntity.getGameId());
+        player2Move1.setBoardPlayerId(player2Id);
+        player2Move1.setCellRow(2);
+        player2Move1.setCellColumn(2);
+        player2Move1.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity playerMove2 = new BoardDataEntity();
+        playerMove2.setBoardId(UUID.randomUUID());
+        playerMove2.setBoardGameId(gameDataEntity.getGameId());
+        playerMove2.setBoardPlayerId(playerId);
+        playerMove2.setCellRow(1);
+        playerMove2.setCellColumn(2);
+        playerMove2.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move2 = new BoardDataEntity();
+        player2Move2.setBoardId(UUID.randomUUID());
+        player2Move2.setBoardGameId(gameDataEntity.getGameId());
+        player2Move2.setBoardPlayerId(player2Id);
+        player2Move2.setCellRow(3);
+        player2Move2.setCellColumn(2);
+        player2Move2.setMoveDate(Calendar.getInstance().getTime());
+
+        List<BoardDataEntity> boardDataEntityList = new ArrayList<>();
+        boardDataEntityList.add(playerMove1);
+        boardDataEntityList.add(player2Move1);
+        boardDataEntityList.add(playerMove2);
+        boardDataEntityList.add(player2Move2);
+
+        Mockito.when(boardDataRepository.findAllByBoardGameId(any())).thenReturn(boardDataEntityList);
+
+        BoardDataEntity playerMove3 = new BoardDataEntity();
+        playerMove3.setBoardId(UUID.randomUUID());
+        playerMove3.setBoardGameId(gameDataEntity.getGameId());
+        playerMove3.setBoardPlayerId(playerId);
+        playerMove3.setCellRow(1);
+        playerMove3.setCellColumn(3);
+        playerMove3.setMoveDate(Calendar.getInstance().getTime());
+
+        Mockito.when(boardDataRepository.save(any())).thenReturn(playerMove3);
+
+        gameDataEntity.setGameStatus(GameStatus.WIN.getValue());
+        gameDataEntity.setGameUpdatedDate(Calendar.getInstance().getTime());
+
+        Mockito.when(gameDataRepository.save(any())).thenReturn(gameDataEntity);
+
+        PlayerInformationEntity playerInfo = new PlayerInformationEntity();
+        playerInfo.setPlayerId(playerId);
+        playerInfo.setPlayerName("Mock Name");
+        playerInfo.setPlayerAge(20);
+        playerInfo.setPlayerTotalWin(0);
+        playerInfo.setPlayerTotalLose(0);
+        playerInfo.setPlayerTotalDraw(0);
+        playerInfo.setPlayerTotalGame(0);
+        date = Calendar.getInstance().getTime();
+        playerInfo.setPlayerCreatedDate(date);
+        playerInfo.setPlayerUpdatedDate(date);
+
+        Mockito.when(playerInformationRepository.findAllByPlayerId(any())).thenReturn(playerInfo);
+
+        PlayerInformationEntity updatedPlayerInfo = new PlayerInformationEntity();
+        updatedPlayerInfo.setPlayerTotalWin(playerInfo.getPlayerTotalWin()+1);
+        updatedPlayerInfo.setPlayerTotalGame(playerInfo.getPlayerTotalGame()+1);
+        updatedPlayerInfo.setPlayerUpdatedDate(Calendar.getInstance().getTime());
+
+        Mockito.when(playerInformationRepository.save(any())).thenReturn(updatedPlayerInfo);
+
+        PlayerMoveRequest request = new PlayerMoveRequest();
+        request.setPlayerId(playerId);
+        request.setCellRow(1);
+        request.setCellColumn(3);
+
+        CommonResponse commonResponse = ticTacToeService.playerMove(request, gameDataEntity.getGameId());
+
+        MoveResponse moveResponse = (MoveResponse) commonResponse.getData();
+
+        MoveDetailsResponse moveResponsePlayer = moveResponse.getPlayer();
+
+        assertEquals("SUCCESS",commonResponse.getStatus());
+        assertEquals(HttpStatus.CREATED,commonResponse.getHttpStatus());
+        assertEquals("WIN",moveResponsePlayer.getGameStatus());
+        assertEquals(1,moveResponsePlayer.getCellRow());
+        assertEquals(3,moveResponsePlayer.getCellColumn());
+
+        verify(boardDataRepository,times(1)).save(any());
+        verify(gameDataRepository,times(1)).save(any());
+        verify(playerInformationRepository,times(2)).save(any());
+        verify(gameDataRepository,times(1)).findAllByGameIdAndGameStatus(any(),any());
+        verify(boardDataRepository,times(1)).findAllByBoardGameId(any());
+
+    }
+
+    @Test
+    public void success_player1Move_multiPlayerGameType_winDiagonalGameStatus(){
+
+        GameDataEntity gameDataEntity = new GameDataEntity();
+        gameDataEntity.setGameId(UUID.randomUUID());
+        UUID playerId = UUID.randomUUID();
+        gameDataEntity.setGamePlayerId(playerId);
+        UUID player2Id = UUID.randomUUID();
+        gameDataEntity.setGamePlayer2Id(player2Id);
+        gameDataEntity.setTableSize(3);
+        gameDataEntity.setGameType(GameType.MULTI_PLAYER.getValue());
+        gameDataEntity.setGameStatus(GameStatus.IN_PROGRESS.getValue());
+        Date date = Calendar.getInstance().getTime();
+        gameDataEntity.setGameCreatedDate(date);
+        gameDataEntity.setGameUpdatedDate(date);
+
+        Mockito.when(gameDataRepository.findAllByGameIdAndGameStatus(any(),any())).thenReturn(gameDataEntity);
+
+
+        BoardDataEntity playerMove1 = new BoardDataEntity();
+        playerMove1.setBoardId(UUID.randomUUID());
+        playerMove1.setBoardGameId(gameDataEntity.getGameId());
+        playerMove1.setBoardPlayerId(playerId);
+        playerMove1.setCellRow(1);
+        playerMove1.setCellColumn(1);
+        playerMove1.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move1 = new BoardDataEntity();
+        player2Move1.setBoardId(UUID.randomUUID());
+        player2Move1.setBoardGameId(gameDataEntity.getGameId());
+        player2Move1.setBoardPlayerId(player2Id);
+        player2Move1.setCellRow(1);
+        player2Move1.setCellColumn(2);
+        player2Move1.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity playerMove2 = new BoardDataEntity();
+        playerMove2.setBoardId(UUID.randomUUID());
+        playerMove2.setBoardGameId(gameDataEntity.getGameId());
+        playerMove2.setBoardPlayerId(playerId);
+        playerMove2.setCellRow(2);
+        playerMove2.setCellColumn(2);
+        playerMove2.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move2 = new BoardDataEntity();
+        player2Move2.setBoardId(UUID.randomUUID());
+        player2Move2.setBoardGameId(gameDataEntity.getGameId());
+        player2Move2.setBoardPlayerId(player2Id);
+        player2Move2.setCellRow(3);
+        player2Move2.setCellColumn(2);
+        player2Move2.setMoveDate(Calendar.getInstance().getTime());
+
+        List<BoardDataEntity> boardDataEntityList = new ArrayList<>();
+        boardDataEntityList.add(playerMove1);
+        boardDataEntityList.add(player2Move1);
+        boardDataEntityList.add(playerMove2);
+        boardDataEntityList.add(player2Move2);
+
+        Mockito.when(boardDataRepository.findAllByBoardGameId(any())).thenReturn(boardDataEntityList);
+
+        BoardDataEntity playerMove3 = new BoardDataEntity();
+        playerMove3.setBoardId(UUID.randomUUID());
+        playerMove3.setBoardGameId(gameDataEntity.getGameId());
+        playerMove3.setBoardPlayerId(playerId);
+        playerMove3.setCellRow(3);
+        playerMove3.setCellColumn(3);
+        playerMove3.setMoveDate(Calendar.getInstance().getTime());
+
+        Mockito.when(boardDataRepository.save(any())).thenReturn(playerMove3);
+
+        gameDataEntity.setGameStatus(GameStatus.WIN.getValue());
+        gameDataEntity.setGameUpdatedDate(Calendar.getInstance().getTime());
+
+        Mockito.when(gameDataRepository.save(any())).thenReturn(gameDataEntity);
+
+        PlayerInformationEntity playerInfo = new PlayerInformationEntity();
+        playerInfo.setPlayerId(playerId);
+        playerInfo.setPlayerName("Mock Name");
+        playerInfo.setPlayerAge(20);
+        playerInfo.setPlayerTotalWin(0);
+        playerInfo.setPlayerTotalLose(0);
+        playerInfo.setPlayerTotalDraw(0);
+        playerInfo.setPlayerTotalGame(0);
+        date = Calendar.getInstance().getTime();
+        playerInfo.setPlayerCreatedDate(date);
+        playerInfo.setPlayerUpdatedDate(date);
+
+        Mockito.when(playerInformationRepository.findAllByPlayerId(any())).thenReturn(playerInfo);
+
+        PlayerInformationEntity updatedPlayerInfo = new PlayerInformationEntity();
+        updatedPlayerInfo.setPlayerTotalWin(playerInfo.getPlayerTotalWin()+1);
+        updatedPlayerInfo.setPlayerTotalGame(playerInfo.getPlayerTotalGame()+1);
+        updatedPlayerInfo.setPlayerUpdatedDate(Calendar.getInstance().getTime());
+
+        Mockito.when(playerInformationRepository.save(any())).thenReturn(updatedPlayerInfo);
+
+        PlayerMoveRequest request = new PlayerMoveRequest();
+        request.setPlayerId(playerId);
+        request.setCellRow(3);
+        request.setCellColumn(3);
+
+        CommonResponse commonResponse = ticTacToeService.playerMove(request, gameDataEntity.getGameId());
+
+        MoveResponse moveResponse = (MoveResponse) commonResponse.getData();
+
+        MoveDetailsResponse moveResponsePlayer = moveResponse.getPlayer();
+
+        assertEquals("SUCCESS",commonResponse.getStatus());
+        assertEquals(HttpStatus.CREATED,commonResponse.getHttpStatus());
+        assertEquals("WIN",moveResponsePlayer.getGameStatus());
+        assertEquals(3,moveResponsePlayer.getCellRow());
+        assertEquals(3,moveResponsePlayer.getCellColumn());
+
+        verify(boardDataRepository,times(1)).save(any());
+        verify(gameDataRepository,times(1)).save(any());
+        verify(playerInformationRepository,times(2)).save(any());
+        verify(gameDataRepository,times(1)).findAllByGameIdAndGameStatus(any(),any());
+        verify(boardDataRepository,times(1)).findAllByBoardGameId(any());
+
+    }
+
+    @Test
+    public void success_player2Move_multiPlayerGameType_loseGameStatusOnPlayer1(){
+
+        GameDataEntity gameDataEntity = new GameDataEntity();
+        UUID gameId = UUID.randomUUID();
+        gameDataEntity.setGameId(gameId);
+        UUID playerId = UUID.randomUUID();
+        gameDataEntity.setGamePlayerId(playerId);
+        UUID player2Id = UUID.randomUUID();
+        gameDataEntity.setGamePlayer2Id(player2Id);
+        gameDataEntity.setTableSize(3);
+        gameDataEntity.setGameType(GameType.MULTI_PLAYER.getValue());
+        gameDataEntity.setGameStatus(GameStatus.IN_PROGRESS.getValue());
+        Date date = Calendar.getInstance().getTime();
+        gameDataEntity.setGameCreatedDate(date);
+        gameDataEntity.setGameUpdatedDate(date);
+
+        Mockito.when(gameDataRepository.findAllByGameIdAndGameStatus(any(),eq(GameStatus.IN_PROGRESS.getValue()))).thenReturn(gameDataEntity);
+
+        BoardDataEntity playerMove1 = new BoardDataEntity();
+        playerMove1.setBoardId(UUID.randomUUID());
+        playerMove1.setBoardGameId(gameDataEntity.getGameId());
+        playerMove1.setBoardPlayerId(playerId);
+        playerMove1.setCellRow(1);
+        playerMove1.setCellColumn(2);
+        playerMove1.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move1 = new BoardDataEntity();
+        player2Move1.setBoardId(UUID.randomUUID());
+        player2Move1.setBoardGameId(gameDataEntity.getGameId());
+        player2Move1.setBoardPlayerId(player2Id);
+        player2Move1.setCellRow(1);
+        player2Move1.setCellColumn(1);
+        player2Move1.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity playerMove2 = new BoardDataEntity();
+        playerMove2.setBoardId(UUID.randomUUID());
+        playerMove2.setBoardGameId(gameDataEntity.getGameId());
+        playerMove2.setBoardPlayerId(playerId);
+        playerMove2.setCellRow(3);
+        playerMove2.setCellColumn(2);
+        playerMove2.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move2 = new BoardDataEntity();
+        player2Move2.setBoardId(UUID.randomUUID());
+        player2Move2.setBoardGameId(gameDataEntity.getGameId());
+        player2Move2.setBoardPlayerId(player2Id);
+        player2Move2.setCellRow(2);
+        player2Move2.setCellColumn(2);
+        player2Move2.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity playerMove3 = new BoardDataEntity();
+        playerMove3.setBoardId(UUID.randomUUID());
+        playerMove3.setBoardGameId(gameDataEntity.getGameId());
+        playerMove3.setBoardPlayerId(playerId);
+        playerMove3.setCellRow(1);
+        playerMove3.setCellColumn(3);
+        playerMove3.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move3 = new BoardDataEntity();
+        player2Move3.setBoardId(UUID.randomUUID());
+        player2Move3.setBoardGameId(gameDataEntity.getGameId());
+        player2Move3.setBoardPlayerId(player2Id);
+        player2Move3.setCellRow(2);
+        player2Move3.setCellColumn(1);
+        player2Move3.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity playerMove4 = new BoardDataEntity();
+        playerMove4.setBoardId(UUID.randomUUID());
+        playerMove4.setBoardGameId(gameDataEntity.getGameId());
+        playerMove4.setBoardPlayerId(playerId);
+        playerMove4.setCellRow(3);
+        playerMove4.setCellColumn(3);
+        playerMove4.setMoveDate(Calendar.getInstance().getTime());
+
+        List<BoardDataEntity> boardDataEntityList = new ArrayList<>();
+        boardDataEntityList.add(playerMove1);
+        boardDataEntityList.add(player2Move1);
+        boardDataEntityList.add(playerMove2);
+        boardDataEntityList.add(player2Move2);
+        boardDataEntityList.add(playerMove3);
+        boardDataEntityList.add(player2Move3);
+        boardDataEntityList.add(playerMove4);
+
+        Mockito.when(boardDataRepository.findAllByBoardGameId(any())).thenReturn(boardDataEntityList);
+
+        BoardDataEntity player2Move4 = new BoardDataEntity();
+        player2Move4.setBoardId(UUID.randomUUID());
+        player2Move4.setBoardGameId(gameDataEntity.getGameId());
+        player2Move4.setBoardPlayerId(player2Id);
+        player2Move4.setCellRow(3);
+        player2Move4.setCellColumn(1);
+        player2Move4.setMoveDate(Calendar.getInstance().getTime());
+
+        Mockito.when(boardDataRepository.save(any())).thenReturn(player2Move4);
+
+        GameDataEntity finalGameResult = new GameDataEntity();
+        finalGameResult.setGameId(gameId);
+        finalGameResult.setGamePlayerId(playerId);
+        finalGameResult.setTableSize(3);
+        finalGameResult.setGameType(GameType.MULTI_PLAYER.getValue());
+        finalGameResult.setGameStatus(GameStatus.LOSE.getValue());
+        finalGameResult.setGameCreatedDate(date);
+        finalGameResult.setGameUpdatedDate(Calendar.getInstance().getTime());
+
+        Mockito.when(gameDataRepository.save(any())).thenReturn(finalGameResult);
+
+        PlayerInformationEntity playerInfo = new PlayerInformationEntity();
+        playerInfo.setPlayerId(playerId);
+        playerInfo.setPlayerName("Mock Name");
+        playerInfo.setPlayerAge(20);
+        playerInfo.setPlayerTotalWin(0);
+        playerInfo.setPlayerTotalLose(0);
+        playerInfo.setPlayerTotalDraw(0);
+        playerInfo.setPlayerTotalGame(0);
+        date = Calendar.getInstance().getTime();
+        playerInfo.setPlayerCreatedDate(date);
+        playerInfo.setPlayerUpdatedDate(date);
+
+        Mockito.when(playerInformationRepository.findAllByPlayerId(any())).thenReturn(playerInfo);
+
+        PlayerInformationEntity updatedPlayerInfo = new PlayerInformationEntity();
+        updatedPlayerInfo.setPlayerTotalLose(playerInfo.getPlayerTotalLose()+1);
+        updatedPlayerInfo.setPlayerTotalGame(playerInfo.getPlayerTotalGame()+1);
+        updatedPlayerInfo.setPlayerUpdatedDate(Calendar.getInstance().getTime());
+
+        Mockito.when(playerInformationRepository.save(any())).thenReturn(updatedPlayerInfo);
+
+        PlayerMoveRequest request = new PlayerMoveRequest();
+        request.setPlayerId(player2Id);
+        request.setCellRow(3);
+        request.setCellColumn(1);
+
+        CommonResponse commonResponse = ticTacToeService.playerMove(request, gameDataEntity.getGameId());
+
+        MoveResponse moveResponse = (MoveResponse) commonResponse.getData();
+
+        MoveDetailsResponse moveResponsePlayer = moveResponse.getPlayer();
+
+        assertEquals("SUCCESS",commonResponse.getStatus());
+        assertEquals(HttpStatus.CREATED,commonResponse.getHttpStatus());
+        assertEquals("WIN",moveResponsePlayer.getGameStatus());
+        assertEquals("LOSE",finalGameResult.getGameStatus());
+
+
+        verify(boardDataRepository,times(1)).save(any());
+        verify(gameDataRepository,times(1)).save(any());
+        verify(playerInformationRepository,times(2)).save(any());
+        verify(gameDataRepository,times(1)).findAllByGameIdAndGameStatus(any(),any());
+        verify(boardDataRepository,times(1)).findAllByBoardGameId(any());
+
+    }
+
+    @Test
+    public void success_player1Move_multiPlayerGameType_DrawGameStatus(){
+
+        GameDataEntity gameDataEntity = new GameDataEntity();
+        UUID gameId = UUID.randomUUID();
+        gameDataEntity.setGameId(gameId);
+        UUID playerId = UUID.randomUUID();
+        gameDataEntity.setGamePlayerId(playerId);
+        UUID player2Id = UUID.randomUUID();
+        gameDataEntity.setGamePlayer2Id(player2Id);
+        gameDataEntity.setTableSize(3);
+        gameDataEntity.setGameType(GameType.MULTI_PLAYER.getValue());
+        gameDataEntity.setGameStatus(GameStatus.IN_PROGRESS.getValue());
+        Date date = Calendar.getInstance().getTime();
+        gameDataEntity.setGameCreatedDate(date);
+        gameDataEntity.setGameUpdatedDate(date);
+
+        Mockito.when(gameDataRepository.findAllByGameIdAndGameStatus(any(),eq(GameStatus.IN_PROGRESS.getValue()))).thenReturn(gameDataEntity);
+
+        BoardDataEntity playerMove1 = new BoardDataEntity();
+        playerMove1.setBoardId(UUID.randomUUID());
+        playerMove1.setBoardGameId(gameDataEntity.getGameId());
+        playerMove1.setBoardPlayerId(playerId);
+        playerMove1.setCellRow(1);
+        playerMove1.setCellColumn(1);
+        playerMove1.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move1 = new BoardDataEntity();
+        player2Move1.setBoardId(UUID.randomUUID());
+        player2Move1.setBoardGameId(gameDataEntity.getGameId());
+        player2Move1.setBoardPlayerId(player2Id);
+        player2Move1.setCellRow(2);
+        player2Move1.setCellColumn(2);
+        player2Move1.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity playerMove2 = new BoardDataEntity();
+        playerMove2.setBoardId(UUID.randomUUID());
+        playerMove2.setBoardGameId(gameDataEntity.getGameId());
+        playerMove2.setBoardPlayerId(playerId);
+        playerMove2.setCellRow(3);
+        playerMove2.setCellColumn(3);
+        playerMove2.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move2 = new BoardDataEntity();
+        player2Move2.setBoardId(UUID.randomUUID());
+        player2Move2.setBoardGameId(gameDataEntity.getGameId());
+        player2Move2.setBoardPlayerId(player2Id);
+        player2Move2.setCellRow(3);
+        player2Move2.setCellColumn(2);
+        player2Move2.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity playerMove3 = new BoardDataEntity();
+        playerMove3.setBoardId(UUID.randomUUID());
+        playerMove3.setBoardGameId(gameDataEntity.getGameId());
+        playerMove3.setBoardPlayerId(playerId);
+        playerMove3.setCellRow(1);
+        playerMove3.setCellColumn(2);
+        playerMove3.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move3 = new BoardDataEntity();
+        player2Move3.setBoardId(UUID.randomUUID());
+        player2Move3.setBoardGameId(gameDataEntity.getGameId());
+        player2Move3.setBoardPlayerId(player2Id);
+        player2Move3.setCellRow(1);
+        player2Move3.setCellColumn(3);
+        player2Move3.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity playerMove4 = new BoardDataEntity();
+        playerMove4.setBoardId(UUID.randomUUID());
+        playerMove4.setBoardGameId(gameDataEntity.getGameId());
+        playerMove4.setBoardPlayerId(playerId);
+        playerMove4.setCellRow(2);
+        playerMove4.setCellColumn(3);
+        playerMove4.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move4 = new BoardDataEntity();
+        player2Move4.setBoardId(UUID.randomUUID());
+        player2Move4.setBoardGameId(gameDataEntity.getGameId());
+        player2Move4.setBoardPlayerId(player2Id);
+        player2Move4.setCellRow(2);
+        player2Move4.setCellColumn(1);
+        player2Move4.setMoveDate(Calendar.getInstance().getTime());
+
+        List<BoardDataEntity> boardDataEntityList = new ArrayList<>();
+        boardDataEntityList.add(playerMove1);
+        boardDataEntityList.add(player2Move1);
+        boardDataEntityList.add(playerMove2);
+        boardDataEntityList.add(player2Move2);
+        boardDataEntityList.add(playerMove3);
+        boardDataEntityList.add(player2Move3);
+        boardDataEntityList.add(playerMove4);
+        boardDataEntityList.add(player2Move4);
+
+        Mockito.when(boardDataRepository.findAllByBoardGameId(any())).thenReturn(boardDataEntityList);
+
+        BoardDataEntity playerMove5 = new BoardDataEntity();
+        playerMove5.setBoardId(UUID.randomUUID());
+        playerMove5.setBoardGameId(gameDataEntity.getGameId());
+        playerMove5.setBoardPlayerId(playerId);
+        playerMove5.setCellRow(3);
+        playerMove5.setCellColumn(1);
+        playerMove5.setMoveDate(Calendar.getInstance().getTime());
+
+        Mockito.when(boardDataRepository.save(any())).thenReturn(playerMove5);
+
+        gameDataEntity.setGameStatus(GameStatus.DRAW.getValue());
+        gameDataEntity.setGameUpdatedDate(Calendar.getInstance().getTime());
+
+        Mockito.when(gameDataRepository.save(any())).thenReturn(gameDataEntity);
+
+        PlayerInformationEntity playerInfo = new PlayerInformationEntity();
+        playerInfo.setPlayerId(playerId);
+        playerInfo.setPlayerName("Mock Name");
+        playerInfo.setPlayerAge(20);
+        playerInfo.setPlayerTotalWin(0);
+        playerInfo.setPlayerTotalLose(0);
+        playerInfo.setPlayerTotalDraw(0);
+        playerInfo.setPlayerTotalGame(0);
+        date = Calendar.getInstance().getTime();
+        playerInfo.setPlayerCreatedDate(date);
+        playerInfo.setPlayerUpdatedDate(date);
+
+        Mockito.when(playerInformationRepository.findAllByPlayerId(any())).thenReturn(playerInfo);
+
+        PlayerInformationEntity updatedPlayerInfo = new PlayerInformationEntity();
+        updatedPlayerInfo.setPlayerTotalDraw(playerInfo.getPlayerTotalDraw()+1);
+        updatedPlayerInfo.setPlayerTotalGame(playerInfo.getPlayerTotalGame()+1);
+        updatedPlayerInfo.setPlayerUpdatedDate(Calendar.getInstance().getTime());
+
+        Mockito.when(playerInformationRepository.save(any())).thenReturn(updatedPlayerInfo);
+
+        PlayerMoveRequest request = new PlayerMoveRequest();
+        request.setPlayerId(playerId);
+        request.setCellRow(3);
+        request.setCellColumn(1);
+
+        CommonResponse commonResponse = ticTacToeService.playerMove(request, gameDataEntity.getGameId());
+
+        MoveResponse moveResponse = (MoveResponse) commonResponse.getData();
+
+        MoveDetailsResponse moveResponsePlayer = moveResponse.getPlayer();
+
+        assertEquals("SUCCESS",commonResponse.getStatus());
+        assertEquals(HttpStatus.CREATED,commonResponse.getHttpStatus());
+        assertEquals("DRAW",moveResponsePlayer.getGameStatus());
+        assertEquals(3,moveResponsePlayer.getCellRow());
+        assertEquals(1,moveResponsePlayer.getCellColumn());
+
+        verify(boardDataRepository,times(1)).save(any());
+        verify(gameDataRepository,times(1)).save(any());
+        verify(playerInformationRepository,times(2)).save(any());
+        verify(gameDataRepository,times(1)).findAllByGameIdAndGameStatus(any(),any());
+        verify(boardDataRepository,times(1)).findAllByBoardGameId(any());
+
+    }
+
+
+    @Test
+    public void success_player2Move_multiPlayerGameType_inProgressGameStatus(){
+
+        GameDataEntity gameDataEntity = new GameDataEntity();
+        gameDataEntity.setGameId(UUID.randomUUID());
+        UUID playerId = UUID.randomUUID();
+        gameDataEntity.setGamePlayerId(playerId);
+        UUID player2Id = UUID.randomUUID();
+        gameDataEntity.setGamePlayer2Id(player2Id);
+        gameDataEntity.setTableSize(3);
+        gameDataEntity.setGameType(GameType.MULTI_PLAYER.getValue());
+        gameDataEntity.setGameStatus(GameStatus.IN_PROGRESS.getValue());
+        Date date = Calendar.getInstance().getTime();
+        gameDataEntity.setGameCreatedDate(date);
+        gameDataEntity.setGameUpdatedDate(date);
+
+        Mockito.when(gameDataRepository.findAllByGameIdAndGameStatus(any(),any())).thenReturn(gameDataEntity);
+
+        List<BoardDataEntity> boardDataEntityList = new ArrayList<>();
+
+        Mockito.when(boardDataRepository.findAllByBoardGameId(any())).thenReturn(boardDataEntityList);
+
+        BoardDataEntity player2Move1 = new BoardDataEntity();
+        player2Move1.setBoardId(UUID.randomUUID());
+        player2Move1.setBoardGameId(gameDataEntity.getGameId());
+        player2Move1.setBoardPlayerId(player2Id);
+        player2Move1.setCellRow(1);
+        player2Move1.setCellColumn(1);
+        player2Move1.setMoveDate(Calendar.getInstance().getTime());
+
+        Mockito.when(boardDataRepository.save(any())).thenReturn(player2Move1);
+
+        gameDataEntity.setGameStatus(GameStatus.IN_PROGRESS.getValue());
+        gameDataEntity.setGameUpdatedDate(Calendar.getInstance().getTime());
+
+        Mockito.when(gameDataRepository.save(any())).thenReturn(gameDataEntity);
+
+        PlayerMoveRequest request = new PlayerMoveRequest();
+        request.setPlayerId(player2Id);
+        request.setCellRow(1);
+        request.setCellColumn(1);
+
+        CommonResponse commonResponse = ticTacToeService.playerMove(request, gameDataEntity.getGameId());
+
+        MoveResponse moveResponse = (MoveResponse) commonResponse.getData();
+
+        MoveDetailsResponse moveResponsePlayer = moveResponse.getPlayer();
+
+        assertEquals("SUCCESS",commonResponse.getStatus());
+        assertEquals(HttpStatus.CREATED,commonResponse.getHttpStatus());
+        assertEquals("IN_PROGRESS",moveResponsePlayer.getGameStatus());
+        assertEquals(1,moveResponsePlayer.getCellRow());
+        assertEquals(1,moveResponsePlayer.getCellColumn());
+
+        verify(boardDataRepository,times(1)).save(any());
+        verify(gameDataRepository,times(1)).save(any());
+        verify(gameDataRepository,times(1)).findAllByGameIdAndGameStatus(any(),any());
+        verify(boardDataRepository,times(1)).findAllByBoardGameId(any());
+    }
+
+    @Test
+    public void success_player2Move_multiPlayerGameType_winVerticalGameStatus(){
+
+        GameDataEntity gameDataEntity = new GameDataEntity();
+        gameDataEntity.setGameId(UUID.randomUUID());
+        UUID playerId = UUID.randomUUID();
+        gameDataEntity.setGamePlayerId(playerId);
+        UUID player2Id = UUID.randomUUID();
+        gameDataEntity.setGamePlayer2Id(player2Id);
+        gameDataEntity.setTableSize(3);
+        gameDataEntity.setGameType(GameType.MULTI_PLAYER.getValue());
+        gameDataEntity.setGameStatus(GameStatus.IN_PROGRESS.getValue());
+        Date date = Calendar.getInstance().getTime();
+        gameDataEntity.setGameCreatedDate(date);
+        gameDataEntity.setGameUpdatedDate(date);
+
+        Mockito.when(gameDataRepository.findAllByGameIdAndGameStatus(any(),any())).thenReturn(gameDataEntity);
+
+        BoardDataEntity playerMove1 = new BoardDataEntity();
+        playerMove1.setBoardId(UUID.randomUUID());
+        playerMove1.setBoardGameId(gameDataEntity.getGameId());
+        playerMove1.setBoardPlayerId(playerId);
+        playerMove1.setCellRow(1);
+        playerMove1.setCellColumn(2);
+        playerMove1.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move1 = new BoardDataEntity();
+        player2Move1.setBoardId(UUID.randomUUID());
+        player2Move1.setBoardGameId(gameDataEntity.getGameId());
+        player2Move1.setBoardPlayerId(player2Id);
+        player2Move1.setCellRow(1);
+        player2Move1.setCellColumn(1);
+        player2Move1.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity playerMove2 = new BoardDataEntity();
+        playerMove2.setBoardId(UUID.randomUUID());
+        playerMove2.setBoardGameId(gameDataEntity.getGameId());
+        playerMove2.setBoardPlayerId(playerId);
+        playerMove2.setCellRow(3);
+        playerMove2.setCellColumn(2);
+        playerMove2.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move2 = new BoardDataEntity();
+        player2Move2.setBoardId(UUID.randomUUID());
+        player2Move2.setBoardGameId(gameDataEntity.getGameId());
+        player2Move2.setBoardPlayerId(player2Id);
+        player2Move2.setCellRow(2);
+        player2Move2.setCellColumn(1);
+        player2Move2.setMoveDate(Calendar.getInstance().getTime());
+
+        List<BoardDataEntity> boardDataEntityList = new ArrayList<>();
+        boardDataEntityList.add(playerMove1);
+        boardDataEntityList.add(player2Move1);
+        boardDataEntityList.add(playerMove2);
+        boardDataEntityList.add(player2Move2);
+
+        Mockito.when(boardDataRepository.findAllByBoardGameId(any())).thenReturn(boardDataEntityList);
+
+        BoardDataEntity player2Move3 = new BoardDataEntity();
+        player2Move3.setBoardId(UUID.randomUUID());
+        player2Move3.setBoardGameId(gameDataEntity.getGameId());
+        player2Move3.setBoardPlayerId(player2Id);
+        player2Move3.setCellRow(3);
+        player2Move3.setCellColumn(1);
+        player2Move3.setMoveDate(Calendar.getInstance().getTime());
+
+        Mockito.when(boardDataRepository.save(any())).thenReturn(player2Move3);
+
+        gameDataEntity.setGameStatus(GameStatus.WIN.getValue());
+        gameDataEntity.setGameUpdatedDate(Calendar.getInstance().getTime());
+
+        Mockito.when(gameDataRepository.save(any())).thenReturn(gameDataEntity);
+
+        PlayerInformationEntity playerInfo = new PlayerInformationEntity();
+        playerInfo.setPlayerId(player2Id);
+        playerInfo.setPlayerName("Mock Name");
+        playerInfo.setPlayerAge(20);
+        playerInfo.setPlayerTotalWin(0);
+        playerInfo.setPlayerTotalLose(0);
+        playerInfo.setPlayerTotalDraw(0);
+        playerInfo.setPlayerTotalGame(0);
+        date = Calendar.getInstance().getTime();
+        playerInfo.setPlayerCreatedDate(date);
+        playerInfo.setPlayerUpdatedDate(date);
+
+        Mockito.when(playerInformationRepository.findAllByPlayerId(any())).thenReturn(playerInfo);
+
+        PlayerInformationEntity updatedPlayerInfo = new PlayerInformationEntity();
+        updatedPlayerInfo.setPlayerTotalWin(playerInfo.getPlayerTotalWin()+1);
+        updatedPlayerInfo.setPlayerTotalGame(playerInfo.getPlayerTotalGame()+1);
+        updatedPlayerInfo.setPlayerUpdatedDate(Calendar.getInstance().getTime());
+
+        Mockito.when(playerInformationRepository.save(any())).thenReturn(updatedPlayerInfo);
+
+        PlayerMoveRequest request = new PlayerMoveRequest();
+        request.setPlayerId(player2Id);
+        request.setCellRow(3);
+        request.setCellColumn(1);
+
+        CommonResponse commonResponse = ticTacToeService.playerMove(request, gameDataEntity.getGameId());
+
+        MoveResponse moveResponse = (MoveResponse) commonResponse.getData();
+
+        MoveDetailsResponse moveResponsePlayer = moveResponse.getPlayer();
+
+        assertEquals("SUCCESS",commonResponse.getStatus());
+        assertEquals(HttpStatus.CREATED,commonResponse.getHttpStatus());
+        assertEquals("WIN",moveResponsePlayer.getGameStatus());
+        assertEquals(3,moveResponsePlayer.getCellRow());
+        assertEquals(1,moveResponsePlayer.getCellColumn());
+
+        verify(boardDataRepository,times(1)).save(any());
+        verify(gameDataRepository,times(1)).save(any());
+        verify(playerInformationRepository,times(2)).save(any());
+        verify(gameDataRepository,times(1)).findAllByGameIdAndGameStatus(any(),any());
+        verify(boardDataRepository,times(1)).findAllByBoardGameId(any());
+
+    }
+
+    @Test
+    public void success_player2Move_multiPlayerGameType_winHorizontalGameStatus(){
+
+        GameDataEntity gameDataEntity = new GameDataEntity();
+        gameDataEntity.setGameId(UUID.randomUUID());
+        UUID playerId = UUID.randomUUID();
+        gameDataEntity.setGamePlayerId(playerId);
+        UUID player2Id = UUID.randomUUID();
+        gameDataEntity.setGamePlayer2Id(player2Id);
+        gameDataEntity.setTableSize(3);
+        gameDataEntity.setGameType(GameType.MULTI_PLAYER.getValue());
+        gameDataEntity.setGameStatus(GameStatus.IN_PROGRESS.getValue());
+        Date date = Calendar.getInstance().getTime();
+        gameDataEntity.setGameCreatedDate(date);
+        gameDataEntity.setGameUpdatedDate(date);
+
+        Mockito.when(gameDataRepository.findAllByGameIdAndGameStatus(any(),any())).thenReturn(gameDataEntity);
+
+        BoardDataEntity playerMove1 = new BoardDataEntity();
+        playerMove1.setBoardId(UUID.randomUUID());
+        playerMove1.setBoardGameId(gameDataEntity.getGameId());
+        playerMove1.setBoardPlayerId(playerId);
+        playerMove1.setCellRow(2);
+        playerMove1.setCellColumn(2);
+        playerMove1.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move1 = new BoardDataEntity();
+        player2Move1.setBoardId(UUID.randomUUID());
+        player2Move1.setBoardGameId(gameDataEntity.getGameId());
+        player2Move1.setBoardPlayerId(player2Id);
+        player2Move1.setCellRow(1);
+        player2Move1.setCellColumn(1);
+        player2Move1.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity playerMove2 = new BoardDataEntity();
+        playerMove2.setBoardId(UUID.randomUUID());
+        playerMove2.setBoardGameId(gameDataEntity.getGameId());
+        playerMove2.setBoardPlayerId(playerId);
+        playerMove2.setCellRow(3);
+        playerMove2.setCellColumn(2);
+        playerMove2.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move2 = new BoardDataEntity();
+        player2Move2.setBoardId(UUID.randomUUID());
+        player2Move2.setBoardGameId(gameDataEntity.getGameId());
+        player2Move2.setBoardPlayerId(player2Id);
+        player2Move2.setCellRow(1);
+        player2Move2.setCellColumn(2);
+        player2Move2.setMoveDate(Calendar.getInstance().getTime());
+
+        List<BoardDataEntity> boardDataEntityList = new ArrayList<>();
+        boardDataEntityList.add(playerMove1);
+        boardDataEntityList.add(player2Move1);
+        boardDataEntityList.add(playerMove2);
+        boardDataEntityList.add(player2Move2);
+
+        Mockito.when(boardDataRepository.findAllByBoardGameId(any())).thenReturn(boardDataEntityList);
+
+        BoardDataEntity player2Move3 = new BoardDataEntity();
+        player2Move3.setBoardId(UUID.randomUUID());
+        player2Move3.setBoardGameId(gameDataEntity.getGameId());
+        player2Move3.setBoardPlayerId(player2Id);
+        player2Move3.setCellRow(1);
+        player2Move3.setCellColumn(3);
+        player2Move3.setMoveDate(Calendar.getInstance().getTime());
+
+        Mockito.when(boardDataRepository.save(any())).thenReturn(player2Move3);
+
+        gameDataEntity.setGameStatus(GameStatus.WIN.getValue());
+        gameDataEntity.setGameUpdatedDate(Calendar.getInstance().getTime());
+
+        Mockito.when(gameDataRepository.save(any())).thenReturn(gameDataEntity);
+
+        PlayerInformationEntity playerInfo = new PlayerInformationEntity();
+        playerInfo.setPlayerId(player2Id);
+        playerInfo.setPlayerName("Mock Name");
+        playerInfo.setPlayerAge(20);
+        playerInfo.setPlayerTotalWin(0);
+        playerInfo.setPlayerTotalLose(0);
+        playerInfo.setPlayerTotalDraw(0);
+        playerInfo.setPlayerTotalGame(0);
+        date = Calendar.getInstance().getTime();
+        playerInfo.setPlayerCreatedDate(date);
+        playerInfo.setPlayerUpdatedDate(date);
+
+        Mockito.when(playerInformationRepository.findAllByPlayerId(any())).thenReturn(playerInfo);
+
+        PlayerInformationEntity updatedPlayerInfo = new PlayerInformationEntity();
+        updatedPlayerInfo.setPlayerTotalWin(playerInfo.getPlayerTotalWin()+1);
+        updatedPlayerInfo.setPlayerTotalGame(playerInfo.getPlayerTotalGame()+1);
+        updatedPlayerInfo.setPlayerUpdatedDate(Calendar.getInstance().getTime());
+
+        Mockito.when(playerInformationRepository.save(any())).thenReturn(updatedPlayerInfo);
+
+        PlayerMoveRequest request = new PlayerMoveRequest();
+        request.setPlayerId(player2Id);
+        request.setCellRow(1);
+        request.setCellColumn(3);
+
+        CommonResponse commonResponse = ticTacToeService.playerMove(request, gameDataEntity.getGameId());
+
+        MoveResponse moveResponse = (MoveResponse) commonResponse.getData();
+
+        MoveDetailsResponse moveResponsePlayer = moveResponse.getPlayer();
+
+        assertEquals("SUCCESS",commonResponse.getStatus());
+        assertEquals(HttpStatus.CREATED,commonResponse.getHttpStatus());
+        assertEquals("WIN",moveResponsePlayer.getGameStatus());
+        assertEquals(1,moveResponsePlayer.getCellRow());
+        assertEquals(3,moveResponsePlayer.getCellColumn());
+
+        verify(boardDataRepository,times(1)).save(any());
+        verify(gameDataRepository,times(1)).save(any());
+        verify(playerInformationRepository,times(2)).save(any());
+        verify(gameDataRepository,times(1)).findAllByGameIdAndGameStatus(any(),any());
+        verify(boardDataRepository,times(1)).findAllByBoardGameId(any());
+
+    }
+
+    @Test
+    public void success_player2Move_multiPlayerGameType_winDiagonalGameStatus(){
+
+        GameDataEntity gameDataEntity = new GameDataEntity();
+        gameDataEntity.setGameId(UUID.randomUUID());
+        UUID playerId = UUID.randomUUID();
+        gameDataEntity.setGamePlayerId(playerId);
+        UUID player2Id = UUID.randomUUID();
+        gameDataEntity.setGamePlayer2Id(player2Id);
+        gameDataEntity.setTableSize(3);
+        gameDataEntity.setGameType(GameType.MULTI_PLAYER.getValue());
+        gameDataEntity.setGameStatus(GameStatus.IN_PROGRESS.getValue());
+        Date date = Calendar.getInstance().getTime();
+        gameDataEntity.setGameCreatedDate(date);
+        gameDataEntity.setGameUpdatedDate(date);
+
+        Mockito.when(gameDataRepository.findAllByGameIdAndGameStatus(any(),any())).thenReturn(gameDataEntity);
+
+
+        BoardDataEntity playerMove1 = new BoardDataEntity();
+        playerMove1.setBoardId(UUID.randomUUID());
+        playerMove1.setBoardGameId(gameDataEntity.getGameId());
+        playerMove1.setBoardPlayerId(playerId);
+        playerMove1.setCellRow(1);
+        playerMove1.setCellColumn(2);
+        playerMove1.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move1 = new BoardDataEntity();
+        player2Move1.setBoardId(UUID.randomUUID());
+        player2Move1.setBoardGameId(gameDataEntity.getGameId());
+        player2Move1.setBoardPlayerId(player2Id);
+        player2Move1.setCellRow(1);
+        player2Move1.setCellColumn(1);
+        player2Move1.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity playerMove2 = new BoardDataEntity();
+        playerMove2.setBoardId(UUID.randomUUID());
+        playerMove2.setBoardGameId(gameDataEntity.getGameId());
+        playerMove2.setBoardPlayerId(playerId);
+        playerMove2.setCellRow(3);
+        playerMove2.setCellColumn(2);
+        playerMove2.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move2 = new BoardDataEntity();
+        player2Move2.setBoardId(UUID.randomUUID());
+        player2Move2.setBoardGameId(gameDataEntity.getGameId());
+        player2Move2.setBoardPlayerId(player2Id);
+        player2Move2.setCellRow(2);
+        player2Move2.setCellColumn(2);
+        player2Move2.setMoveDate(Calendar.getInstance().getTime());
+
+        List<BoardDataEntity> boardDataEntityList = new ArrayList<>();
+        boardDataEntityList.add(playerMove1);
+        boardDataEntityList.add(player2Move1);
+        boardDataEntityList.add(playerMove2);
+        boardDataEntityList.add(player2Move2);
+
+        Mockito.when(boardDataRepository.findAllByBoardGameId(any())).thenReturn(boardDataEntityList);
+
+        BoardDataEntity player2Move3 = new BoardDataEntity();
+        player2Move3.setBoardId(UUID.randomUUID());
+        player2Move3.setBoardGameId(gameDataEntity.getGameId());
+        player2Move3.setBoardPlayerId(player2Id);
+        player2Move3.setCellRow(3);
+        player2Move3.setCellColumn(3);
+        player2Move3.setMoveDate(Calendar.getInstance().getTime());
+
+        Mockito.when(boardDataRepository.save(any())).thenReturn(player2Move3);
+
+        gameDataEntity.setGameStatus(GameStatus.WIN.getValue());
+        gameDataEntity.setGameUpdatedDate(Calendar.getInstance().getTime());
+
+        Mockito.when(gameDataRepository.save(any())).thenReturn(gameDataEntity);
+
+        PlayerInformationEntity playerInfo = new PlayerInformationEntity();
+        playerInfo.setPlayerId(player2Id);
+        playerInfo.setPlayerName("Mock Name");
+        playerInfo.setPlayerAge(20);
+        playerInfo.setPlayerTotalWin(0);
+        playerInfo.setPlayerTotalLose(0);
+        playerInfo.setPlayerTotalDraw(0);
+        playerInfo.setPlayerTotalGame(0);
+        date = Calendar.getInstance().getTime();
+        playerInfo.setPlayerCreatedDate(date);
+        playerInfo.setPlayerUpdatedDate(date);
+
+        Mockito.when(playerInformationRepository.findAllByPlayerId(any())).thenReturn(playerInfo);
+
+        PlayerInformationEntity updatedPlayerInfo = new PlayerInformationEntity();
+        updatedPlayerInfo.setPlayerTotalWin(playerInfo.getPlayerTotalWin()+1);
+        updatedPlayerInfo.setPlayerTotalGame(playerInfo.getPlayerTotalGame()+1);
+        updatedPlayerInfo.setPlayerUpdatedDate(Calendar.getInstance().getTime());
+
+        Mockito.when(playerInformationRepository.save(any())).thenReturn(updatedPlayerInfo);
+
+        PlayerMoveRequest request = new PlayerMoveRequest();
+        request.setPlayerId(player2Id);
+        request.setCellRow(3);
+        request.setCellColumn(3);
+
+        CommonResponse commonResponse = ticTacToeService.playerMove(request, gameDataEntity.getGameId());
+
+        MoveResponse moveResponse = (MoveResponse) commonResponse.getData();
+
+        MoveDetailsResponse moveResponsePlayer = moveResponse.getPlayer();
+
+        assertEquals("SUCCESS",commonResponse.getStatus());
+        assertEquals(HttpStatus.CREATED,commonResponse.getHttpStatus());
+        assertEquals("WIN",moveResponsePlayer.getGameStatus());
+        assertEquals(3,moveResponsePlayer.getCellRow());
+        assertEquals(3,moveResponsePlayer.getCellColumn());
+
+        verify(boardDataRepository,times(1)).save(any());
+        verify(gameDataRepository,times(1)).save(any());
+        verify(playerInformationRepository,times(2)).save(any());
+        verify(gameDataRepository,times(1)).findAllByGameIdAndGameStatus(any(),any());
+        verify(boardDataRepository,times(1)).findAllByBoardGameId(any());
+
+    }
+
+    @Test
+    public void success_player1Move_multiPlayerGameType_loseGameStatusOnPlayer2(){
+
+        GameDataEntity gameDataEntity = new GameDataEntity();
+        UUID gameId = UUID.randomUUID();
+        gameDataEntity.setGameId(gameId);
+        UUID playerId = UUID.randomUUID();
+        gameDataEntity.setGamePlayerId(playerId);
+        UUID player2Id = UUID.randomUUID();
+        gameDataEntity.setGamePlayer2Id(player2Id);
+        gameDataEntity.setTableSize(3);
+        gameDataEntity.setGameType(GameType.MULTI_PLAYER.getValue());
+        gameDataEntity.setGameStatus(GameStatus.IN_PROGRESS.getValue());
+        Date date = Calendar.getInstance().getTime();
+        gameDataEntity.setGameCreatedDate(date);
+        gameDataEntity.setGameUpdatedDate(date);
+
+        Mockito.when(gameDataRepository.findAllByGameIdAndGameStatus(any(),eq(GameStatus.IN_PROGRESS.getValue()))).thenReturn(gameDataEntity);
+
+        BoardDataEntity playerMove1 = new BoardDataEntity();
+        playerMove1.setBoardId(UUID.randomUUID());
+        playerMove1.setBoardGameId(gameDataEntity.getGameId());
+        playerMove1.setBoardPlayerId(playerId);
+        playerMove1.setCellRow(1);
+        playerMove1.setCellColumn(1);
+        playerMove1.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move1 = new BoardDataEntity();
+        player2Move1.setBoardId(UUID.randomUUID());
+        player2Move1.setBoardGameId(gameDataEntity.getGameId());
+        player2Move1.setBoardPlayerId(player2Id);
+        player2Move1.setCellRow(1);
+        player2Move1.setCellColumn(2);
+        player2Move1.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity playerMove2 = new BoardDataEntity();
+        playerMove2.setBoardId(UUID.randomUUID());
+        playerMove2.setBoardGameId(gameDataEntity.getGameId());
+        playerMove2.setBoardPlayerId(playerId);
+        playerMove2.setCellRow(2);
+        playerMove2.setCellColumn(2);
+        playerMove2.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move2 = new BoardDataEntity();
+        player2Move2.setBoardId(UUID.randomUUID());
+        player2Move2.setBoardGameId(gameDataEntity.getGameId());
+        player2Move2.setBoardPlayerId(player2Id);
+        player2Move2.setCellRow(3);
+        player2Move2.setCellColumn(2);
+        player2Move2.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity playerMove3 = new BoardDataEntity();
+        playerMove3.setBoardId(UUID.randomUUID());
+        playerMove3.setBoardGameId(gameDataEntity.getGameId());
+        playerMove3.setBoardPlayerId(playerId);
+        playerMove3.setCellRow(2);
+        playerMove3.setCellColumn(1);
+        playerMove3.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move3 = new BoardDataEntity();
+        player2Move3.setBoardId(UUID.randomUUID());
+        player2Move3.setBoardGameId(gameDataEntity.getGameId());
+        player2Move3.setBoardPlayerId(player2Id);
+        player2Move3.setCellRow(1);
+        player2Move3.setCellColumn(3);
+        player2Move3.setMoveDate(Calendar.getInstance().getTime());
+
+        List<BoardDataEntity> boardDataEntityList = new ArrayList<>();
+        boardDataEntityList.add(playerMove1);
+        boardDataEntityList.add(player2Move1);
+        boardDataEntityList.add(playerMove2);
+        boardDataEntityList.add(player2Move2);
+        boardDataEntityList.add(playerMove3);
+        boardDataEntityList.add(player2Move3);
+
+        Mockito.when(boardDataRepository.findAllByBoardGameId(any())).thenReturn(boardDataEntityList);
+
+        BoardDataEntity playerMove4 = new BoardDataEntity();
+        playerMove4.setBoardId(UUID.randomUUID());
+        playerMove4.setBoardGameId(gameDataEntity.getGameId());
+        playerMove4.setBoardPlayerId(playerId);
+        playerMove4.setCellRow(3);
+        playerMove4.setCellColumn(3);
+        playerMove4.setMoveDate(Calendar.getInstance().getTime());
+
+        Mockito.when(boardDataRepository.save(any())).thenReturn(playerMove4);
+
+        GameDataEntity finalGameResult = new GameDataEntity();
+        finalGameResult.setGameId(gameId);
+        finalGameResult.setGamePlayerId(player2Id);
+        finalGameResult.setTableSize(3);
+        finalGameResult.setGameType(GameType.MULTI_PLAYER.getValue());
+        finalGameResult.setGameStatus(GameStatus.LOSE.getValue());
+        finalGameResult.setGameCreatedDate(date);
+        finalGameResult.setGameUpdatedDate(Calendar.getInstance().getTime());
+
+        Mockito.when(gameDataRepository.save(any())).thenReturn(finalGameResult);
+
+        PlayerInformationEntity playerInfo = new PlayerInformationEntity();
+        playerInfo.setPlayerId(player2Id);
+        playerInfo.setPlayerName("Mock Name");
+        playerInfo.setPlayerAge(20);
+        playerInfo.setPlayerTotalWin(0);
+        playerInfo.setPlayerTotalLose(0);
+        playerInfo.setPlayerTotalDraw(0);
+        playerInfo.setPlayerTotalGame(0);
+        date = Calendar.getInstance().getTime();
+        playerInfo.setPlayerCreatedDate(date);
+        playerInfo.setPlayerUpdatedDate(date);
+
+        Mockito.when(playerInformationRepository.findAllByPlayerId(any())).thenReturn(playerInfo);
+
+        PlayerInformationEntity updatedPlayerInfo = new PlayerInformationEntity();
+        updatedPlayerInfo.setPlayerTotalLose(playerInfo.getPlayerTotalLose()+1);
+        updatedPlayerInfo.setPlayerTotalGame(playerInfo.getPlayerTotalGame()+1);
+        updatedPlayerInfo.setPlayerUpdatedDate(Calendar.getInstance().getTime());
+
+        Mockito.when(playerInformationRepository.save(any())).thenReturn(updatedPlayerInfo);
+
+        PlayerMoveRequest request = new PlayerMoveRequest();
+        request.setPlayerId(playerId);
+        request.setCellRow(3);
+        request.setCellColumn(3);
+
+        CommonResponse commonResponse = ticTacToeService.playerMove(request, gameDataEntity.getGameId());
+
+        MoveResponse moveResponse = (MoveResponse) commonResponse.getData();
+
+        MoveDetailsResponse moveResponsePlayer = moveResponse.getPlayer();
+
+        assertEquals("SUCCESS",commonResponse.getStatus());
+        assertEquals(HttpStatus.CREATED,commonResponse.getHttpStatus());
+        assertEquals("WIN",moveResponsePlayer.getGameStatus());
+        assertEquals("LOSE",finalGameResult.getGameStatus());
+
+        verify(boardDataRepository,times(1)).save(any());
+        verify(gameDataRepository,times(1)).save(any());
+        verify(playerInformationRepository,times(2)).save(any());
+        verify(gameDataRepository,times(1)).findAllByGameIdAndGameStatus(any(),any());
+        verify(boardDataRepository,times(1)).findAllByBoardGameId(any());
+
+    }
+
+    @Test
+    public void success_player2Move_multiPlayerGameType_DrawGameStatus(){
+
+        GameDataEntity gameDataEntity = new GameDataEntity();
+        UUID gameId = UUID.randomUUID();
+        gameDataEntity.setGameId(gameId);
+        UUID playerId = UUID.randomUUID();
+        gameDataEntity.setGamePlayerId(playerId);
+        UUID player2Id = UUID.randomUUID();
+        gameDataEntity.setGamePlayer2Id(player2Id);
+        gameDataEntity.setTableSize(3);
+        gameDataEntity.setGameType(GameType.MULTI_PLAYER.getValue());
+        gameDataEntity.setGameStatus(GameStatus.IN_PROGRESS.getValue());
+        Date date = Calendar.getInstance().getTime();
+        gameDataEntity.setGameCreatedDate(date);
+        gameDataEntity.setGameUpdatedDate(date);
+
+        Mockito.when(gameDataRepository.findAllByGameIdAndGameStatus(any(),eq(GameStatus.IN_PROGRESS.getValue()))).thenReturn(gameDataEntity);
+
+        BoardDataEntity playerMove1 = new BoardDataEntity();
+        playerMove1.setBoardId(UUID.randomUUID());
+        playerMove1.setBoardGameId(gameDataEntity.getGameId());
+        playerMove1.setBoardPlayerId(playerId);
+        playerMove1.setCellRow(2);
+        playerMove1.setCellColumn(2);
+        playerMove1.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move1 = new BoardDataEntity();
+        player2Move1.setBoardId(UUID.randomUUID());
+        player2Move1.setBoardGameId(gameDataEntity.getGameId());
+        player2Move1.setBoardPlayerId(player2Id);
+        player2Move1.setCellRow(1);
+        player2Move1.setCellColumn(1);
+        player2Move1.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity playerMove2 = new BoardDataEntity();
+        playerMove2.setBoardId(UUID.randomUUID());
+        playerMove2.setBoardGameId(gameDataEntity.getGameId());
+        playerMove2.setBoardPlayerId(playerId);
+        playerMove2.setCellRow(3);
+        playerMove2.setCellColumn(2);
+        playerMove2.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move2 = new BoardDataEntity();
+        player2Move2.setBoardId(UUID.randomUUID());
+        player2Move2.setBoardGameId(gameDataEntity.getGameId());
+        player2Move2.setBoardPlayerId(player2Id);
+        player2Move2.setCellRow(3);
+        player2Move2.setCellColumn(3);
+        player2Move2.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity playerMove3 = new BoardDataEntity();
+        playerMove3.setBoardId(UUID.randomUUID());
+        playerMove3.setBoardGameId(gameDataEntity.getGameId());
+        playerMove3.setBoardPlayerId(playerId);
+        playerMove3.setCellRow(1);
+        playerMove3.setCellColumn(3);
+        playerMove3.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move3 = new BoardDataEntity();
+        player2Move3.setBoardId(UUID.randomUUID());
+        player2Move3.setBoardGameId(gameDataEntity.getGameId());
+        player2Move3.setBoardPlayerId(player2Id);
+        player2Move3.setCellRow(1);
+        player2Move3.setCellColumn(2);
+        player2Move3.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity playerMove4 = new BoardDataEntity();
+        playerMove4.setBoardId(UUID.randomUUID());
+        playerMove4.setBoardGameId(gameDataEntity.getGameId());
+        playerMove4.setBoardPlayerId(playerId);
+        playerMove4.setCellRow(2);
+        playerMove4.setCellColumn(1);
+        playerMove4.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity player2Move4 = new BoardDataEntity();
+        player2Move4.setBoardId(UUID.randomUUID());
+        player2Move4.setBoardGameId(gameDataEntity.getGameId());
+        player2Move4.setBoardPlayerId(player2Id);
+        player2Move4.setCellRow(2);
+        player2Move4.setCellColumn(3);
+        player2Move4.setMoveDate(Calendar.getInstance().getTime());
+
+        List<BoardDataEntity> boardDataEntityList = new ArrayList<>();
+        boardDataEntityList.add(playerMove1);
+        boardDataEntityList.add(player2Move1);
+        boardDataEntityList.add(playerMove2);
+        boardDataEntityList.add(player2Move2);
+        boardDataEntityList.add(playerMove3);
+        boardDataEntityList.add(player2Move3);
+        boardDataEntityList.add(playerMove4);
+        boardDataEntityList.add(player2Move4);
+
+        Mockito.when(boardDataRepository.findAllByBoardGameId(any())).thenReturn(boardDataEntityList);
+
+        BoardDataEntity player2Move5 = new BoardDataEntity();
+        player2Move5.setBoardId(UUID.randomUUID());
+        player2Move5.setBoardGameId(gameDataEntity.getGameId());
+        player2Move5.setBoardPlayerId(player2Id);
+        player2Move5.setCellRow(3);
+        player2Move5.setCellColumn(1);
+        player2Move5.setMoveDate(Calendar.getInstance().getTime());
+
+        Mockito.when(boardDataRepository.save(any())).thenReturn(player2Move5);
+
+        gameDataEntity.setGameStatus(GameStatus.DRAW.getValue());
+        gameDataEntity.setGameUpdatedDate(Calendar.getInstance().getTime());
+
+        Mockito.when(gameDataRepository.save(any())).thenReturn(gameDataEntity);
+
+        PlayerInformationEntity playerInfo = new PlayerInformationEntity();
+        playerInfo.setPlayerId(player2Id);
+        playerInfo.setPlayerName("Mock Name");
+        playerInfo.setPlayerAge(20);
+        playerInfo.setPlayerTotalWin(0);
+        playerInfo.setPlayerTotalLose(0);
+        playerInfo.setPlayerTotalDraw(0);
+        playerInfo.setPlayerTotalGame(0);
+        date = Calendar.getInstance().getTime();
+        playerInfo.setPlayerCreatedDate(date);
+        playerInfo.setPlayerUpdatedDate(date);
+
+        Mockito.when(playerInformationRepository.findAllByPlayerId(any())).thenReturn(playerInfo);
+
+        PlayerInformationEntity updatedPlayerInfo = new PlayerInformationEntity();
+        updatedPlayerInfo.setPlayerTotalDraw(playerInfo.getPlayerTotalDraw()+1);
+        updatedPlayerInfo.setPlayerTotalGame(playerInfo.getPlayerTotalGame()+1);
+        updatedPlayerInfo.setPlayerUpdatedDate(Calendar.getInstance().getTime());
+
+        Mockito.when(playerInformationRepository.save(any())).thenReturn(updatedPlayerInfo);
+
+        PlayerMoveRequest request = new PlayerMoveRequest();
+        request.setPlayerId(player2Id);
+        request.setCellRow(3);
+        request.setCellColumn(1);
+
+        CommonResponse commonResponse = ticTacToeService.playerMove(request, gameDataEntity.getGameId());
+
+        MoveResponse moveResponse = (MoveResponse) commonResponse.getData();
+
+        MoveDetailsResponse moveResponsePlayer = moveResponse.getPlayer();
+
+        assertEquals("SUCCESS",commonResponse.getStatus());
+        assertEquals(HttpStatus.CREATED,commonResponse.getHttpStatus());
+        assertEquals("DRAW",moveResponsePlayer.getGameStatus());
+        assertEquals(3,moveResponsePlayer.getCellRow());
+        assertEquals(1,moveResponsePlayer.getCellColumn());
+
+        verify(boardDataRepository,times(1)).save(any());
+        verify(gameDataRepository,times(1)).save(any());
+        verify(playerInformationRepository,times(2)).save(any());
+        verify(gameDataRepository,times(1)).findAllByGameIdAndGameStatus(any(),any());
+        verify(boardDataRepository,times(1)).findAllByBoardGameId(any());
+
+    }
+
+
 
 }
