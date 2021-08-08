@@ -2461,6 +2461,135 @@ public class TicTacToeServiceTest {
 
     }
 
+    @Test
+    public void fail_playerMove_gameNotFoundOrGameEnded(){
+
+        GameDataEntity gameDataEntity = new GameDataEntity();
+        gameDataEntity.setGameId(UUID.randomUUID());
+        UUID playerId = UUID.randomUUID();
+        gameDataEntity.setGamePlayerId(playerId);
+        gameDataEntity.setTableSize(3);
+        gameDataEntity.setGameType(GameType.SOLO.getValue());
+        gameDataEntity.setGameStatus(GameStatus.IN_PROGRESS.getValue());
+        Date date = Calendar.getInstance().getTime();
+        gameDataEntity.setGameCreatedDate(date);
+        gameDataEntity.setGameUpdatedDate(date);
+
+        Mockito.when(gameDataRepository.findAllByGameIdAndGameStatus(any(),any())).thenReturn(null);
+
+        PlayerMoveRequest request = new PlayerMoveRequest();
+        request.setPlayerId(playerId);
+        request.setCellRow(3);
+        request.setCellColumn(1);
+
+        CommonResponse commonResponse = ticTacToeService.playerMove(request, gameDataEntity.getGameId());
+
+        ErrorResponse errorResponse = (ErrorResponse) commonResponse.getData();
+
+        assertEquals("GAME NOT FOUND OR GAME HAS ALREADY ENDED",errorResponse.getError());
+        assertEquals("NOT_FOUND",commonResponse.getStatus());
+        assertEquals(HttpStatus.NOT_FOUND,commonResponse.getHttpStatus());
+
+        verify(gameDataRepository,times(1)).findAllByGameIdAndGameStatus(any(),any());
+
+
+
+    }
+
+    @Test
+    public void fail_playerMove_cellMoveOutOfTableScope(){
+
+        GameDataEntity gameDataEntity = new GameDataEntity();
+        UUID gameId = UUID.randomUUID();
+        gameDataEntity.setGameId(gameId);
+        UUID playerId = UUID.randomUUID();
+        gameDataEntity.setGamePlayerId(playerId);
+        gameDataEntity.setTableSize(3);
+        gameDataEntity.setGameType(GameType.SOLO.getValue());
+        gameDataEntity.setGameStatus(GameStatus.IN_PROGRESS.getValue());
+        Date date = Calendar.getInstance().getTime();
+        gameDataEntity.setGameCreatedDate(date);
+        gameDataEntity.setGameUpdatedDate(date);
+
+        Mockito.when(gameDataRepository.findAllByGameIdAndGameStatus(any(),any())).thenReturn(gameDataEntity);
+
+        try {
+
+            PlayerMoveRequest request = new PlayerMoveRequest();
+            request.setPlayerId(playerId);
+            request.setCellRow(5);
+            request.setCellColumn(1);
+
+            ticTacToeService.playerMove(request,gameId);
+
+        } catch (ValidateException e) {
+
+            assertEquals("OUT OF TABLE SCOPE", e.getErrorMessage());
+
+        }
+
+        verify(gameDataRepository,times(1)).findAllByGameIdAndGameStatus(any(),any());
+
+    }
+
+    @Test
+    public void fail_playerMove_duplicateCellMove(){
+
+        GameDataEntity gameDataEntity = new GameDataEntity();
+        UUID gameId = UUID.randomUUID();
+        gameDataEntity.setGameId(gameId);
+        UUID playerId = UUID.randomUUID();
+        gameDataEntity.setGamePlayerId(playerId);
+        gameDataEntity.setTableSize(3);
+        gameDataEntity.setGameType(GameType.SOLO.getValue());
+        gameDataEntity.setGameStatus(GameStatus.IN_PROGRESS.getValue());
+        Date date = Calendar.getInstance().getTime();
+        gameDataEntity.setGameCreatedDate(date);
+        gameDataEntity.setGameUpdatedDate(date);
+
+        Mockito.when(gameDataRepository.findAllByGameIdAndGameStatus(any(),any())).thenReturn(gameDataEntity);
+
+        BoardDataEntity playerMove1 = new BoardDataEntity();
+        playerMove1.setBoardId(UUID.randomUUID());
+        playerMove1.setBoardGameId(gameDataEntity.getGameId());
+        playerMove1.setBoardPlayerId(gameDataEntity.getGamePlayerId());
+        playerMove1.setCellRow(1);
+        playerMove1.setCellColumn(1);
+        playerMove1.setMoveDate(Calendar.getInstance().getTime());
+
+        BoardDataEntity botMove1 = new BoardDataEntity();
+        botMove1.setBoardId(UUID.randomUUID());
+        botMove1.setBoardGameId(gameDataEntity.getGameId());
+        botMove1.setBoardPlayerId(UUID.fromString("99999999-9999-9999-9999-999999999999"));
+        botMove1.setCellRow(1);
+        botMove1.setCellColumn(2);
+        botMove1.setMoveDate(Calendar.getInstance().getTime());
+
+        List<BoardDataEntity> boardDataEntityList = new ArrayList<>();
+        boardDataEntityList.add(playerMove1);
+        boardDataEntityList.add(botMove1);
+
+        Mockito.when(boardDataRepository.findAllByBoardGameId(any())).thenReturn(boardDataEntityList);
+
+        try {
+
+            PlayerMoveRequest request = new PlayerMoveRequest();
+            request.setPlayerId(playerId);
+            request.setCellRow(1);
+            request.setCellColumn(1);
+
+            ticTacToeService.playerMove(request,gameId);
+
+        } catch (ValidateException e) {
+
+            assertEquals("YOUR SELECTED CELL IS NOT EMPTY", e.getErrorMessage());
+
+        }
+
+        verify(gameDataRepository,times(1)).findAllByGameIdAndGameStatus(any(),any());
+        verify(boardDataRepository,times(1)).findAllByBoardGameId(any());
+
+    }
 
 
 }
